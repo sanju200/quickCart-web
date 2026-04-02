@@ -115,7 +115,7 @@ const CategoryManagerScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, alignItems: 'center' }} showsVerticalScrollIndicator={false}>
+      <View style={{ flex: 1, paddingBottom: 120, alignItems: 'center' }}>
         <View style={styles.contentWrapper}>
           <View style={styles.content}>
             {isAdding ? (
@@ -190,7 +190,7 @@ const CategoryManagerScreen = () => {
             )}
           </View>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };

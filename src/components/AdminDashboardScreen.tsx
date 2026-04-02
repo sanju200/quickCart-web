@@ -235,7 +235,8 @@ const dashboardStyles: Record<string, React.CSSProperties> = {
   },
   scrollContainer: {
     flex: 1,
-    overflowY: 'auto' as any,
+    overflowY: 'visible' as any,
+    height: 'auto',
     padding: '24px',
   },
   dashboardContentWrapper: {

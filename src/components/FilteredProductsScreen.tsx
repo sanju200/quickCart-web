@@ -102,7 +102,7 @@ const FilteredProductsScreen = () => {
         </div>
       </div>
 
-      <div className="product-content" style={{ overflowY: 'auto', flex: 1, backgroundColor: '#FAFAFA' }}>
+      <div className="product-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#FAFAFA' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', width: '100%' }}>
           {loading ? (
             <div className="center-container" style={{ padding: '80px 20px' }}>

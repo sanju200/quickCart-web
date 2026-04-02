@@ -303,7 +303,7 @@ const InventoryManagerScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, alignItems: 'center' }} showsVerticalScrollIndicator={false}>
+      <View style={{ flex: 1, paddingBottom: 120, alignItems: 'center' }}>
         <View style={styles.contentWrapper}>
           <View style={styles.statsContainer}>
               <View style={[styles.statCard, styles.pendingCard]}>
@@ -419,7 +419,7 @@ const InventoryManagerScreen = () => {
             )}
           </View>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };

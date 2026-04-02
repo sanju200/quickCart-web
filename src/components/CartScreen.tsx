@@ -51,12 +51,7 @@ const CartScreen = () => {
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Review Cart</Text>
-      </View>
-
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      </View>      <View style={styles.scrollContent}>
         <View style={styles.contentWrapper}>
           {loading ? (
             <View style={styles.centerContainer}>
@@ -141,7 +136,7 @@ const CartScreen = () => {
             </View>
           )}
         </View>
-      </ScrollView>
+      </View>
 
       {items.length > 0 && (
         <View style={styles.checkoutBarContainer}>

@@ -207,7 +207,7 @@ const SavedAddressesScreen = () => {
         </div>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
+      <div className="scroll-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', padding: '24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 32 }}>
             {user?.addresses && user.addresses.length > 0 ? (

@@ -200,7 +200,13 @@ function AppContent({ fadeAnim }: { fadeAnim: Animated.Value }) {
   const showHeader = !['LOGIN', 'SIGNUP', 'NOT_FOUND'].includes(currentScreen);
 
   return (
-    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div className="page-container" style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      height: currentScreen === 'CATEGORY_PRODUCTS' ? '100vh' : 'auto', 
+      overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible' 
+    }}>
       {showHeader && <Header />}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <AppScreen currentScreen={currentScreen} />
@@ -300,7 +306,14 @@ function AppScreen({ currentScreen }: { currentScreen: Screen }) {
   };
 
   return (
-    <div style={{ flex: 1, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ 
+      flex: 1, 
+      width: '100%', 
+      height: currentScreen === 'CATEGORY_PRODUCTS' ? '100%' : 'auto', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible' 
+    }}>
       {renderScreen()}
     </div>
   );

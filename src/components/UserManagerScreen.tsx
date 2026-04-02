@@ -97,11 +97,11 @@ const UserManagerScreen = () => {
   const renderUserItem = ({ item }: { item: AdminUser }) => (
     <View style={styles.userCard}>
       <View style={styles.userAvatar}>
-        <Text style={styles.avatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.avatarText}>{(item.name || '?').charAt(0).toUpperCase()}</Text>
       </View>
       <View style={styles.userInfo}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userName}>{item.name || 'Unknown User'}</Text>
           {currentUser?.id === item.id && (
             <View style={styles.selfBadge}>
               <Text style={styles.selfBadgeText}>YOU</Text>
@@ -116,7 +116,7 @@ const UserManagerScreen = () => {
       {currentUser?.id !== item.id && (
         <TouchableOpacity 
           style={styles.deleteBtn} 
-          onPress={() => handleDeleteUser(item.id, item.name)}
+          onPress={() => handleDeleteUser(item.id, item.name || 'this user')}
         >
           <Text style={styles.deleteIcon}>🗑️</Text>
         </TouchableOpacity>
@@ -180,7 +180,9 @@ const UserManagerScreen = () => {
                     return roleA - roleB;
                   }
 
-                  return a.name.localeCompare(b.name);
+                  const nameA = a.name || '';
+                  const nameB = b.name || '';
+                  return nameA.localeCompare(nameB);
                 })}
                 keyExtractor={(item) => item.id}
                 renderItem={renderUserItem}
@@ -202,11 +204,12 @@ const UserManagerScreen = () => {
         transparent={true}
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setIsModalVisible(false)}
-        >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={() => setIsModalVisible(false)} 
+          />
           <View style={styles.modalContent}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={styles.modalTitle}>Create New Account</Text>

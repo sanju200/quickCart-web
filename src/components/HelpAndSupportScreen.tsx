@@ -60,7 +60,7 @@ const HelpAndSupportScreen = () => {
         </div>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
+      <div className="scroll-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', padding: '24px' }}>
           <div className="hero-section" style={{
             textAlign: 'center',

@@ -39,7 +39,7 @@ const ProfileScreen = () => {
   const getInitial = (name: string) => name.charAt(0).toUpperCase();
 
   return (
-    <div className="container" style={{ flex: 1, height: '100%' }}>
+    <div className="container">
       <div className="header">
         <button onClick={() => navigate('HOME')} className="back-button" aria-label="Go back">
           <span className="back-icon">←</span>
@@ -47,15 +47,7 @@ const ProfileScreen = () => {
         <h1 className="header-title">Account Details</h1>
       </div>
 
-      <ScrollView 
-        style={{ flex: 1, backgroundColor: '#f9fbf9' }}
-        contentContainerStyle={{ 
-          padding: 20, 
-          paddingBottom: 120, 
-          alignItems: 'center' 
-        }}
-        showsVerticalScrollIndicator={false}
-      >
+      <div className="scroll-content">
         <div className="content-wrapper">
           {loading ? (
             <div className="user-card" style={{ justifyContent: 'center' }}>
@@ -173,7 +165,7 @@ const ProfileScreen = () => {
 
           <span className="version-text">Version 1.2.0 • QuickCart Web</span>
         </div>
-      </ScrollView>
+      </div>
     </div>
   );
 };

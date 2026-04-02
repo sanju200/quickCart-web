@@ -110,7 +110,7 @@ const PreviouslyOrderedProducts = () => {
         </div>
       </div>
 
-      <div className="product-content" style={{ overflowY: 'auto', flex: 1 }}>
+      <div className="product-content" style={{ overflowY: 'visible', height: 'auto', flex: 1 }}>
         {loading ? (
           <div className="center-container">
             <ActivityIndicator size="large" color="#2E7D32" />

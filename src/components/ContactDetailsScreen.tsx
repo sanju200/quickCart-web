@@ -47,7 +47,7 @@ const ContactDetailsScreen = () => {
         </div>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
+      <div className="scroll-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', width: '100%', padding: '24px' }}>
           <div className="user-card" style={{ padding: '32px', marginBottom: '32px', display: 'flex !important', flexDirection: 'column !important' as any }}>
             <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column' }}>

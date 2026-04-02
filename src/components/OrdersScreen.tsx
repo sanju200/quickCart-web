@@ -110,7 +110,7 @@ const OrdersScreen = () => {
         <h1 className="header-title">Order History</h1>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'auto', flex: 1 }}>
+      <div className="product-content" style={{ overflowY: 'visible', height: 'auto', flex: 1 }}>
         <div className="content-wrapper" style={{ maxWidth: 1000 }}>
           {loading ? (
             <div className="center-container">
