@@ -22,7 +22,8 @@ const UserManagerScreen = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   
   // New User Form
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('USER');
@@ -51,17 +52,17 @@ const UserManagerScreen = () => {
   };
 
   const handleAddUser = async () => {
-    if (!name || !email || !password) {
-      showToast('Name, email and password are required', 'error');
+    if (!firstName || !email || !password) {
+      showToast('First name, email and password are required', 'error');
       return;
     }
 
     try {
       setLoading(true);
-      await addUser({ name, email, password, role });
+      await addUser({ firstName, lastName, email, password, role });
       showToast('User created successfully', 'success');
       resetForm();
-      fetchUsers();
+      await fetchUsers();
     } catch (error: any) {
       showToast(error.message || 'Failed to create user', 'error');
     } finally {
@@ -70,7 +71,8 @@ const UserManagerScreen = () => {
   };
 
   const resetForm = () => {
-    setName('');
+    setFirstName('');
+    setLastName('');
     setEmail('');
     setPassword('');
     setRole('USER');
@@ -94,36 +96,6 @@ const UserManagerScreen = () => {
     }
   };
 
-  const renderUserItem = ({ item }: { item: AdminUser }) => (
-    <View style={styles.userCard}>
-      <View style={styles.userAvatar}>
-        <Text style={styles.avatarText}>{(item.name || '?').charAt(0).toUpperCase()}</Text>
-      </View>
-      <View style={styles.userInfo}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.userName}>{item.name || 'Unknown User'}</Text>
-          {currentUser?.id === item.id && (
-            <View style={styles.selfBadge}>
-              <Text style={styles.selfBadgeText}>YOU</Text>
-            </View>
-          )}
-        </View>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
-          <Text style={styles.roleText}>{item.role}</Text>
-        </View>
-      </View>
-      {currentUser?.id !== item.id && (
-        <TouchableOpacity 
-          style={styles.deleteBtn} 
-          onPress={() => handleDeleteUser(item.id, item.name || 'this user')}
-        >
-          <Text style={styles.deleteIcon}>🗑️</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'ADMIN': return '#D32F2F';
@@ -132,6 +104,39 @@ const UserManagerScreen = () => {
       case 'DELIVERY_PARTNER': return '#388E3C';
       default: return '#757575';
     }
+  };
+
+  const renderUserItem = ({ item }: { item: AdminUser }) => {
+    const fullName = item.firstName ? `${item.firstName} ${item.lastName || ''}`.trim() : (item.name || 'Unknown User');
+    return (
+      <View style={styles.userCard}>
+        <View style={styles.userAvatar}>
+          <Text style={styles.avatarText}>{fullName.charAt(0).toUpperCase()}</Text>
+        </View>
+        <View style={styles.userInfo}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.userName}>{fullName}</Text>
+            {currentUser?.id === item.id && (
+              <View style={styles.selfBadge}>
+                <Text style={styles.selfBadgeText}>YOU</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.userEmail}>{item.email}</Text>
+          <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
+            <Text style={styles.roleText}>{item.role}</Text>
+          </View>
+        </View>
+        {currentUser?.id !== item.id && (
+          <TouchableOpacity 
+            style={styles.deleteBtn} 
+            onPress={() => handleDeleteUser(item.id, fullName)}
+          >
+            <Text style={styles.deleteIcon}>🗑️</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -180,8 +185,8 @@ const UserManagerScreen = () => {
                     return roleA - roleB;
                   }
 
-                  const nameA = a.name || '';
-                  const nameB = b.name || '';
+                  const nameA = a.firstName ? `${a.firstName} ${a.lastName || ''}` : (a.name || '');
+                  const nameB = b.firstName ? `${b.firstName} ${b.lastName || ''}` : (b.name || '');
                   return nameA.localeCompare(nameB);
                 })}
                 keyExtractor={(item) => item.id}
@@ -215,12 +220,22 @@ const UserManagerScreen = () => {
               <Text style={styles.modalTitle}>Create New Account</Text>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={styles.label}>First Name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="John Doe"
-                  value={name}
-                  onChangeText={setName}
+                  placeholder="John"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Last Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Doe"
+                  value={lastName}
+                  onChangeText={setLastName}
                 />
               </View>
 
@@ -280,7 +295,7 @@ const UserManagerScreen = () => {
               </View>
             </ScrollView>
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
     </View>
   );

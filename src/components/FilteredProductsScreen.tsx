@@ -141,11 +141,15 @@ const FilteredProductsScreen = () => {
               ))}
               
               {products.length === 0 && (
-                <div style={{ gridColumn: `1 / span ${numColumns}`, textAlign: 'center', padding: '100px 20px' }}>
-                  <span style={{ fontSize: 64, marginBottom: 20, opacity: 0.3, display: 'block' }}>🔍</span>
-                  <h2 style={{ fontSize: 20, color: '#333', fontWeight: 700 }}>No products found</h2>
-                  <p style={{ color: '#666', marginTop: 8 }}>Try adjusting your filters or search terms</p>
-                  <button className="reorder-btn" style={{ marginTop: 24 }} onClick={() => navigate('HOME')}>
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', minHeight: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', width: '100%' }}>
+                  <span style={{ fontSize: 64, marginBottom: 20, opacity: 0.3 }}>🔍</span>
+                  <h2 style={{ fontSize: 24, color: '#333', fontWeight: 700, marginBottom: 8 }}>No products found</h2>
+                  <p style={{ color: '#666', fontSize: 16 }}>Try adjusting your filters or search terms</p>
+                  <button 
+                    className="reorder-btn" 
+                    style={{ marginTop: 32, padding: '14px 28px', minWidth: 200 }} 
+                    onClick={() => navigate('HOME')}
+                  >
                     <span className="reorder-btn-text">Browse All Products</span>
                   </button>
                 </div>

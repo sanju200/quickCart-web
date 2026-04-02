@@ -13,11 +13,14 @@ export interface AdminStats {
 
 export interface AdminUser {
     id: string;
-    name: string;
+    firstName?: string;
+    lastName?: string;
+    name?: string;
     email: string;
     role: string;
     phone?: string;
     createdAt?: string;
+    created_at?: string;
 }
 
 export const getAdminStats = async (): Promise<AdminStats> => {

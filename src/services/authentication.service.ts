@@ -1,7 +1,7 @@
 import { Storage as AsyncStorage } from './storage.service';
 
 const BASE_URL = '';
-const API_URL = '/auth';
+const API_URL = `${BASE_URL}/auth`;
 
 export interface Address {
     type: 'Home' | 'Work' | 'Other';
@@ -16,6 +16,8 @@ export interface Address {
 export interface UserData {
     id: string;
     name: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
     phone?: string;
     role?: 'USER' | 'ADMIN' | 'INVENTORY_MANAGER' | 'LOGISTICS_PARTNER' | 'DELIVERY_PARTNER';
@@ -56,7 +58,10 @@ export const loginUser = async (email: string, password: string) => {
 
         const userData: UserData = {
             id: data.id || data.user?.id || '',
-            name: data.name || data.user?.name || email.split('@')[0],
+            firstName: data.firstName || data.user?.firstName || '',
+            lastName: data.lastName || data.user?.lastName || '',
+            name: data.name || data.user?.name || 
+                  (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : email.split('@')[0]),
             email: data.email || data.user?.email || email,
             phone: data.phone || data.user?.phone || '',
             role: data.role || data.user?.role || 'USER',

@@ -46,39 +46,39 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/cart': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/categories': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/product': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/order': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/offer': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/admin': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/users': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
       },
     },
