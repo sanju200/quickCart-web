@@ -35,7 +35,7 @@ const ContactDetailsScreen = () => {
   return (
     <div className="container">
       <div className="header">
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: 800, margin: '0 auto', padding: '0 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: 800, padding: '0' }}>
           <button 
             onClick={() => navigate(categoryData?.from || 'PROFILE')} 
             className="back-button"
@@ -55,7 +55,7 @@ const ContactDetailsScreen = () => {
               <span style={{ fontSize: 18, color: '#333', fontWeight: 700 }}>{user?.name || 'Not set'}</span>
             </div>
             
-            <div style={{ height: 1, backgroundColor: '#f0f0f0', margin: '16px 0', width: '100%' }} />
+            <div style={{ height: 1, backgroundColor: '#f0f0f0', margin: '16px 0', width: '100%' }} /> 
             
             <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: 13, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 6 }}>Email Address</span>

@@ -111,7 +111,7 @@ const OrdersScreen = () => {
       </div>
 
       <div className="product-content" style={{ overflowY: 'visible', height: 'auto', flex: 1 }}>
-        <div className="content-wrapper" style={{ maxWidth: 1000 }}>
+        <div className="content-wrapper" style={{ maxWidth: '100%' }}>
           {loading ? (
             <div className="center-container">
               <ActivityIndicator size="large" color="#2E7D32" />

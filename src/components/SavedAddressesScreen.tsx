@@ -195,7 +195,7 @@ const SavedAddressesScreen = () => {
   return (
     <div className="container">
       <div className="header">
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: 1000, margin: '0 auto', padding: '0 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: 1000, padding: '0' }}>
           <button 
             onClick={() => navigate(categoryData?.from || 'PROFILE')} 
             className="back-button"
