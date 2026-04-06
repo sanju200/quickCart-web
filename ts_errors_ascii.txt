@@ -1,0 +1,82 @@
+src/App.tsx(7,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/AddProductScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/CartScreen.tsx(10,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/Categories.tsx(6,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/CategoryManagerScreen.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/CategoryManagerScreen.tsx(181,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/CategoryProducts.tsx(5,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/CommissionManagerScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/CommissionManagerScreen.tsx(87,38): error TS7006: Parameter 'val' implicitly has an 'any' type.
+src/components/ContactDetailsScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/DeliveryAnalyticsScreen.tsx(8,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/DeliveryPartnerScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/DeliveryPartnerScreen.tsx(257,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/EditProfileScreen.tsx(10,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/ExecutiveDashboard.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/FeedbackCenterScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/FeedbackCenterScreen.tsx(73,36): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/FilteredProductsScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/HelpAndSupportScreen.tsx(8,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/InventoryManagerScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/InventoryManagerScreen.tsx(396,40): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/InventoryManagerScreen.tsx(409,40): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/LiveDeliveryMap.tsx(10,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/LoginScreen.tsx(2,88): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/LogisticsManagerScreen.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/LogisticsManagerScreen.tsx(269,38): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/LowStockDashboard.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/LowStockDashboard.tsx(115,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/NotFoundScreen.tsx(2,58): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/OfferManagerScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/OfferManagerScreen.tsx(152,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/OperationalControlScreen.tsx(10,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/OrdersScreen.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/PartnerOnboardingScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/PartnerOnboardingScreen.tsx(94,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/PaymentsScreen.tsx(10,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/PreviouslyOrderedProducts.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/ProductCard.tsx(2,86): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/ProfileScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/SalesManagerScreen.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/SalesManagerScreen.tsx(128,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/SavedAddressesScreen.tsx(11,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/SignupScreen.tsx(2,88): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/ToastNotification.tsx(2,44): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/TrackOrderScreen.tsx(9,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/UserManagerScreen.tsx(12,8): error TS7016: Could not find a declaration file for module 'react-native'. 'C:/Users/SanjivaniBhongade/apps/Web/quickCart-web/node_modules/react-native-web/dist/cjs/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react-native-web` if it exists or add a new declaration (.d.ts) file containing `declare module 'react-native';`
+src/components/UserManagerScreen.tsx(192,32): error TS7006: Parameter 'item' implicitly has an 'any' type.
