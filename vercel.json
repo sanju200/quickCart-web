@@ -1,0 +1,44 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/cart/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/cart/:path*"
+    },
+    {
+      "source": "/categories/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/categories/:path*"
+    },
+    {
+      "source": "/product/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/product/:path*"
+    },
+    {
+      "source": "/order/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/order/:path*"
+    },
+    {
+      "source": "/offer/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/offer/:path*"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/admin/:path*"
+    },
+    {
+      "source": "/users/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/users/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://quickcart-backend-production-e087.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
