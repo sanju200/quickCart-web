@@ -16,8 +16,6 @@ export interface Address {
 export interface UserData {
     id: string;
     name: string;
-    firstName?: string;
-    lastName?: string;
     email: string;
     phone?: string;
     role?: 'USER' | 'ADMIN' | 'INVENTORY_MANAGER' | 'LOGISTICS_PARTNER' | 'DELIVERY_PARTNER';
@@ -39,7 +37,7 @@ export const loginUser = async (email: string, password: string) => {
             throw new Error(data.message || 'Login failed');
         }
         await AsyncStorage.setItem('authToken', data.access_token || data.token);
-        
+
         const normalizeAddresses = (addr: any): Address[] => {
             if (Array.isArray(addr)) return addr;
             if (typeof addr === 'string' && addr.trim()) {
@@ -60,8 +58,8 @@ export const loginUser = async (email: string, password: string) => {
             id: data.id || data.user?.id || '',
             firstName: data.firstName || data.user?.firstName || '',
             lastName: data.lastName || data.user?.lastName || '',
-            name: data.name || data.user?.name || 
-                  (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : email.split('@')[0]),
+            name: data.name || data.user?.name ||
+                (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : email.split('@')[0]),
             email: data.email || data.user?.email || email,
             phone: data.phone || data.user?.phone || '',
             role: data.role || data.user?.role || 'USER',
@@ -142,7 +140,7 @@ export const getUserData = async (): Promise<UserData | null> => {
 export const updateProfile = async (userData: UserData) => {
     try {
         const token = await getAuthToken();
-        const { id, ...updateData } = userData;
+        const { id, name, ...updateData } = userData;
         const response = await fetch(`${BASE_URL}/users/${id}`, {
             method: 'PUT',
             headers: {
@@ -175,7 +173,9 @@ export const updateProfile = async (userData: UserData) => {
 
         const updatedUser: UserData = {
             id: data.id || userData.id,
-            name: data.name || userData.name,
+            // firstName: data.firstName || userData.firstName,
+            // lastName: data.lastName || userData.lastName,
+            name: data.name || (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : userData.name),
             email: data.email || userData.email,
             phone: data.phone || userData.phone,
             role: data.role || userData.role,

@@ -82,7 +82,16 @@ const CartScreen = () => {
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.product?.name || 'Unknown Product'}</Text>
                       <Text style={styles.itemWeight}>{item.product?.weight}</Text>
-                      <Text style={styles.itemPrice}>₹{item.product?.price}</Text>
+                      <Text style={styles.itemPrice}>
+                        ₹{item.product?.price}
+                        {item.quantity > 1 && (
+                          <Text style={styles.itemPriceTotal}>
+                            {' '} x {item.quantity} = ₹{(typeof item.product?.price === 'string' 
+                              ? parseFloat(item.product.price.replace(/[^\d.]/g, '')) 
+                              : typeof item.product?.price === 'number' ? item.product.price : 0) * item.quantity}
+                          </Text>
+                        )}
+                      </Text>
                     </View>
                     <View style={styles.quantityControl}>
                       <TouchableOpacity 
@@ -266,6 +275,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginTop: 4,
+  },
+  itemPriceTotal: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '400',
   },
   quantityControl: {
     flexDirection: 'row',
