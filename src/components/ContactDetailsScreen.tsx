@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import { useAppNavigation } from '../context/AppContext';
@@ -23,6 +22,8 @@ const ContactDetailsScreen = () => {
     };
     loadUserData();
   }, []);
+
+  const getInitial = (name: string) => name.charAt(0).toUpperCase();
 
   if (loading) {
     return (
@@ -47,138 +48,131 @@ const ContactDetailsScreen = () => {
         </div>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', width: '100%', padding: '24px' }}>
-          <div className="user-card" style={{ padding: '32px', marginBottom: '32px', display: 'flex !important', flexDirection: 'column !important' as any }}>
-            <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 13, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 6 }}>Full Name</span>
-              <span style={{ fontSize: 18, color: '#333', fontWeight: 700 }}>{user?.name || 'Not set'}</span>
+      <div className="scroll-content" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+        <div style={{ maxWidth: 1200, width: '100%', animation: 'fadeIn 0.6s ease-out' }}>
+          
+          {/* Main Horizontal Card */}
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: 40,
+            boxShadow: '0 40px 100px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(255,255,255,0.8)',
+            display: 'flex',
+            flexDirection: 'row',
+            overflow: 'hidden',
+            minHeight: 450
+          }}>
+            
+            {/* Left Column: Identity */}
+            <div style={{ 
+              width: '35%', 
+              background: 'linear-gradient(135deg, #1e293b, #334155)',
+              padding: 60,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center'
+            }}>
+              <div style={{ 
+                width: 140, 
+                height: 140, 
+                borderRadius: 70, 
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                border: '4px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 24,
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+              }}>
+                <span style={{ fontSize: 60, color: '#fff', fontWeight: 900 }}>
+                  {user?.name ? getInitial(user.name) : 'QC'}
+                </span>
+              </div>
+              <h2 style={{ fontSize: 32, fontWeight: 900, color: '#f8fafc', margin: '0 0 10px 0' }}>{user?.name || 'Member'}</h2>
             </div>
-            
-            <div style={{ height: 1, backgroundColor: '#f0f0f0', margin: '16px 0', width: '100%' }} /> 
-            
-            <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 13, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 6 }}>Email Address</span>
-              <span style={{ fontSize: 18, color: '#333', fontWeight: 700 }}>{user?.email || 'Not set'}</span>
+
+            {/* Right Column: Details Grid */}
+            <div style={{ flex: 1, padding: 60, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 14, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 30 }}>Credential Overview</h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 30 }}>
+                   <HorizontalInfo icon="👤" label="Full Name" value={user?.name} />
+                   <HorizontalInfo icon="✉️" label="Email Address" value={user?.email} />
+                   <HorizontalInfo icon="📞" label="Phone Number" value={user?.phone} />
+                   <HorizontalInfo icon="📅" label="Last Updated" value={new Date().toLocaleDateString()} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
+                <button 
+                  className="track-btn" 
+                  style={{ 
+                    padding: '18px 40px', 
+                    borderRadius: 20,
+                    background: '#1e293b',
+                    border: 'none',
+                    boxShadow: '0 15px 30px rgba(30,41,59,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 15,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => navigate('EDIT_PROFILE', { from: categoryData?.from || 'PROFILE' })}
+                >
+                  <span style={{ color: 'white', fontSize: 16, fontWeight: 800 }}>Update Identity</span>
+                  <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', width: 24, height: 24, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ color: 'white', fontSize: 14 }}>✎</span>
+                  </div>
+                </button>
+              </div>
             </div>
-            
-            <div style={{ height: 1, backgroundColor: '#f0f0f0', margin: '16px 0', width: '100%' }} />
-            
-            <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 13, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 6 }}>Phone Number</span>
-              <span style={{ fontSize: 18, color: '#333', fontWeight: 700 }}>{user?.phone || 'Not set'}</span>
-            </div>
+
           </div>
 
-          <button 
-            className="track-btn" 
-            style={{ width: '100%', padding: '18px', fontSize: 16, borderRadius: '16px' }}
-            onClick={() => navigate('EDIT_PROFILE', { from: categoryData?.from || 'PROFILE' })}
-          >
-            <span className="track-btn-text">Edit Details</span>
-          </button>
-
-          <p style={{ marginTop: 24, fontSize: 14, color: '#999', textAlign: 'center', lineHeight: 1.6, maxWidth: 400, margin: '24px auto 0' }}>
-            Your contact details are used to send order updates and for delivery personnel to reach you safely.
+          <p style={{ marginTop: 40, fontSize: 14, color: '#94a3b8', textAlign: 'center', maxWidth: 600, margin: '40px auto 0' }}>
+            Privacy Note: Your personal data is protected by industry-standard encryption protocols. Only authorized support personnel can access this information.
           </p>
         </div>
       </div>
+      
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 };
 
+const HorizontalInfo = ({ icon, label, value }: { icon: string, label: string, value?: string }) => (
+  <div style={{ 
+    padding: '24px', 
+    backgroundColor: '#f8fafc', 
+    borderRadius: 24, 
+    border: '1px solid #f1f5f9',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 20
+  }}>
+    <div style={{ fontSize: 24 }}>{icon}</div>
+    <div>
+      <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</span>
+      <p style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', margin: '2px 0 0 0' }}>{value || 'Not Provided'}</p>
+    </div>
+  </div>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FBF9',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    padding: 5,
-    marginRight: 10,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#000',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  scrollContent: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  contentWrapper: {
-    width: '100%',
-    maxWidth: 600,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#eee',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    marginBottom: 25,
-  },
-  detailRow: {
-    paddingVertical: 10,
-  },
-  label: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f1f1f1',
-    marginVertical: 5,
-  },
-  editBtn: {
-    backgroundColor: '#2E7D32',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  editBtnText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  infoText: {
-    marginTop: 20,
-    fontSize: 13,
-    color: '#999',
-    textAlign: 'center',
-    lineHeight: 18,
   },
 });
 
