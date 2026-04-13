@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useAppNavigation } from '../context/AppContext';
 
 interface CarouselItem {
   id: string;
@@ -50,6 +51,7 @@ const DATA: CarouselItem[] = [
 ];
 
 const Carousel = () => {
+  const { navigate } = useAppNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -101,7 +103,12 @@ const Carousel = () => {
               <h2 style={styles.title}>{item.title}</h2>
               <p style={styles.subtitle}>{item.subtitle}</p>
               <p style={styles.description}>{item.description}</p>
-              <button style={styles.button}>Order Now →</button>
+                <button 
+                  style={styles.button}
+                  onClick={() => navigate('CATEGORY_PRODUCTS', { from: 'HOME' })}
+                >
+                  Order Now →
+                </button>
             </div>
           </div>
         ))}
