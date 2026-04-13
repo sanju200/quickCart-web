@@ -51,7 +51,7 @@ import ToastNotification from './components/ToastNotification';
 import { getAuthToken, getUserData } from './services/authentication.service';
 
 import { Screen, NavigationContext, CartContext } from './context/AppContext';
-import { getCart } from './services/cart.service';
+import { getCart, addToCart, handleCartQuantityChange } from './services/cart.service';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('HOME');
@@ -85,6 +85,64 @@ function App() {
   const resetCart = () => {
     setCartItems([]);
     setCartCount(0);
+  };
+
+  const addToCartOptimistic = async (product: any) => {
+    // 1. Optimistically update local state
+    const newItem = {
+      id: Date.now().toString(), // Temp ID
+      productId: product.id,
+      product: product,
+      quantity: 1
+    };
+    
+    const updatedItems = [...cartItems, newItem];
+    setCartItems(updatedItems);
+    setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
+
+    try {
+      // 2. Perform background API call
+      await addToCart(product.id, 1);
+      // 3. Re-sync with server to get real IDs and calculated totals
+      await refreshCartCount();
+    } catch (error) {
+      // 4. Rollback on failure
+      console.error('Optimistic add to cart failed:', error);
+      refreshCartCount(); // Re-sync to original state
+      showToast('Failed to add item to cart', 'error');
+    }
+  };
+
+  const updateQtyOptimistic = async (productId: string, delta: number) => {
+    // 1. Find the item
+    const itemIndex = cartItems.findIndex(i => (i.productId || i.product?.id) === productId);
+    if (itemIndex === -1) return;
+
+    const currentItem = cartItems[itemIndex];
+    const newQuantity = currentItem.quantity + delta;
+
+    // 2. Optimistic local state update
+    let updatedItems;
+    if (newQuantity <= 0) {
+      updatedItems = cartItems.filter((_, i) => i !== itemIndex);
+    } else {
+      updatedItems = [...cartItems];
+      updatedItems[itemIndex] = { ...currentItem, quantity: newQuantity };
+    }
+
+    setCartItems(updatedItems);
+    setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
+
+    try {
+      // 3. API call in background
+      await handleCartQuantityChange(productId, newQuantity);
+      // 4. Re-sync
+      await refreshCartCount();
+    } catch (error) {
+      console.error('Optimistic update quantity failed:', error);
+      refreshCartCount();
+      showToast('Failed to update quantity', 'error');
+    }
   };
 
   useEffect(() => {
@@ -179,7 +237,7 @@ function App() {
 
   return (
     <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar, isLoading, setIsLoading }}>
-      <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart }}>
+      <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart, addToCartOptimistic, updateQtyOptimistic }}>
         <Sidebar />
         <div className="app-wrapper">
           <AppContent fadeAnim={fadeAnim} />

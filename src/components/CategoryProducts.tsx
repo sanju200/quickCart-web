@@ -6,7 +6,7 @@ import {
 import { useAppNavigation, useCartCount } from '../context/AppContext';
 import { getFilteredProducts, Product, getCategoryName } from '../services/product.service';
 import { getAllCategories } from '../services/category.service';
-import { addToCart, handleCartQuantityChange, CartItem } from '../services/cart.service';
+import { CartItem } from '../services/cart.service';
 import ProductCard from './ProductCard';
 import '../styles/common.css';
 import '../styles/forms.css';
@@ -14,7 +14,7 @@ import '../styles/sidebar.css';
 
 const CategoryProducts = () => {
   const { categoryData, navigate } = useAppNavigation();
-  const { cartItems, refreshCartCount } = useCartCount();
+  const { cartItems, refreshCartCount, addToCartOptimistic, updateQtyOptimistic } = useCartCount();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedSideCategory, setSelectedSideCategory] = useState(categoryData?.category || 'all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -124,21 +124,11 @@ const CategoryProducts = () => {
   };
 
   const handleAddToCart = async (product: Product) => {
-    try {
-      await addToCart(product.id, 1);
-      refreshCartCount();
-    } catch (err: any) {
-      console.error('Add to cart error:', err);
-    }
+    addToCartOptimistic(product);
   };
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
-    try {
-      await handleCartQuantityChange(productId, currentQty + delta);
-      refreshCartCount();
-    } catch (err: any) {
-      console.error('Error updating cart:', err);
-    }
+    updateQtyOptimistic(productId, delta);
   };
 
   return (

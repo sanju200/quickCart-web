@@ -18,7 +18,9 @@ const SavedAddressesScreen = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
 
 
   // New Address Form State
@@ -267,7 +269,11 @@ const SavedAddressesScreen = () => {
                     <button 
                       className="qty-btn" 
                       style={{ padding: '8px 20px', background: 'none', border: '1px solid #ffebee', borderRadius: 8, color: '#d32f2f', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-                      onClick={(e) => { e.stopPropagation(); handleDelete(index); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setIndexToDelete(index);
+                        setShowDeleteModal(true);
+                      }}
                     >
                       Remove
                     </button>
@@ -284,11 +290,55 @@ const SavedAddressesScreen = () => {
           </div>
 
           <button 
-            className="track-btn" 
-            style={{ width: '100%', padding: '18px', fontSize: 16, borderRadius: '16px', marginBottom: 20 }}
             onClick={() => setShowAddModal(true)}
+            style={{ 
+              width: '100%', 
+              padding: '24px', 
+              borderRadius: '20px', 
+              backgroundColor: '#F1F8E9', 
+              border: '2px dashed #2E7D32',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              cursor: 'pointer',
+              marginBottom: '24px',
+              transition: 'all 0.2s ease',
+              outline: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#E8F5E9';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(46,125,50,0.1)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#F1F8E9';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
-            <span className="track-btn-text">+ Add New Address</span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '50%', 
+              backgroundColor: '#2E7D32', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              boxShadow: '0 4px 10px rgba(46,125,50,0.3)'
+            }}>
+              <span style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold' }}>+</span>
+            </div>
+            <span style={{ 
+              color: '#2E7D32', 
+              fontSize: '16px', 
+              fontWeight: '800',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Add New Address
+            </span>
           </button>
 
           <button 
@@ -416,6 +466,96 @@ const SavedAddressesScreen = () => {
             >
               {saving ? <ActivityIndicator color="#fff" size="small" /> : <span style={{ color: '#fff', fontSize: 16, fontWeight: 800 }}>Save Address</span>}
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 99999,
+          padding: 20
+        }}>
+          <div style={{ 
+            backgroundColor: '#fff', 
+            borderRadius: '24px', 
+            boxShadow: '0 24px 50px rgba(0,0,0,0.2)',
+            maxWidth: 400, 
+            width: '100%', 
+            padding: '32px', 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              width: '60px', 
+              height: '60px', 
+              borderRadius: '50%', 
+              backgroundColor: '#FFF3E0', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              marginBottom: 20
+            }}>
+              <span style={{ fontSize: '30px' }}>⚠️</span>
+            </div>
+            
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 12px 0', color: '#1a1a1a' }}>Remove Address?</h2>
+            <p style={{ fontSize: 15, color: '#666', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+              Are you sure you want to remove this address? This action cannot be undone.
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, width: '100%' }}>
+              <button 
+                style={{ 
+                  flex: 1, 
+                  padding: '14px', 
+                  borderRadius: '12px', 
+                  border: '1px solid #eee', 
+                  backgroundColor: '#fff',
+                  color: '#666',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                style={{ 
+                  flex: 1, 
+                  padding: '14px', 
+                  borderRadius: '12px', 
+                  border: 'none', 
+                  backgroundColor: '#d32f2f',
+                  color: '#fff',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(211,47,47,0.2)'
+                }}
+                onClick={() => {
+                  if (indexToDelete !== null) {
+                    handleDelete(indexToDelete);
+                  }
+                  setShowDeleteModal(false);
+                }}
+              >
+                Remove
+              </button>
+            </div>
           </div>
         </div>
       </Modal>

@@ -21,6 +21,8 @@ interface CartContextType {
   cartCount: number;
   refreshCartCount: () => Promise<void>;
   resetCart: () => void;
+  addToCartOptimistic: (product: any) => Promise<void>;
+  updateQtyOptimistic: (productId: string, delta: number) => Promise<void>;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);

@@ -9,12 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { handleCartQuantityChange } from '../services/cart.service';
+// Keep existing imports if any or remove the line if empty
 import { getUserData, UserData } from '../services/authentication.service';
 
 const CartScreen = () => {
   const { navigate } = useAppNavigation();
-  const { cartItems: items, refreshCartCount } = useCartCount();
+  const { cartItems: items, refreshCartCount, updateQtyOptimistic } = useCartCount();
   const [loading] = useState(false);
   const [error] = useState<string | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
@@ -25,12 +25,7 @@ const CartScreen = () => {
   }, []);
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
-    try {
-      await handleCartQuantityChange(productId, currentQty + delta);
-      await refreshCartCount();
-    } catch (err: any) {
-      console.error('Error updating cart:', err);
-    }
+    updateQtyOptimistic(productId, delta);
   };
 
   const calculateSubtotal = () => {
