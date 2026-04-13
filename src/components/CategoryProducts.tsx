@@ -33,13 +33,23 @@ const CategoryProducts = () => {
         // If categories were passed through navigation, use them instead of re-fetching
         if (categoryData?.allCategories && Array.isArray(categoryData.allCategories) && categoryData.allCategories.length > 0) {
           console.log('[CategoryProducts] Using passed categories data');
-          setCategories(categoryData.allCategories);
+          let passedCats = categoryData.allCategories;
+          // Ensure "All" category is present
+          if (!passedCats.find((c: any) => c.id === 'all' || c.category === 'all')) {
+            passedCats = [{ id: 'all', title: 'All Products', category: 'all', icon: '🌟' }, ...passedCats];
+          }
+          setCategories(passedCats);
           return;
         }
 
         console.log('[CategoryProducts] Fetching categories from API');
         const data = await getAllCategories();
-        setCategories(data);
+        // getAllCategories already includes "All", but let's be safe
+        let allCats = data;
+        if (!allCats.find((c: any) => c.id === 'all' || c.category === 'all')) {
+          allCats = [{ id: 'all', title: 'All', category: 'all', icon: '🌟' }, ...allCats];
+        }
+        setCategories(allCats);
       } catch (err) {
         console.error('Error loading sidebar categories:', err);
       } finally {
