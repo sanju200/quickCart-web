@@ -69,6 +69,7 @@ const PaymentsScreen = () => {
           productTitle: item.product?.name || 'Product',
           productImage: item.product?.image || 'https://via.placeholder.com/60',
           quantity: item.quantity,
+          categoryId: item.product?.categoryId || '',
           price: typeof item.product?.price === 'string' 
             ? parseFloat(item.product.price.replace(/[^\d.]/g, '')) 
             : item.product?.price || 0
