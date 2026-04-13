@@ -47,7 +47,7 @@ const CartScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigate('HOME')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => window.history.back()} style={styles.backButton}>
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Review Cart</Text>
