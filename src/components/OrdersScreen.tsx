@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  FlatList,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
@@ -17,7 +16,7 @@ import '../styles/components.css';
 
 const OrdersScreen = () => {
   const { navigate, categoryData, showToast } = useAppNavigation();
-  const { cartItems, addToCartOptimistic, updateQtyOptimistic } = useCartCount();
+  const { addToCartOptimistic } = useCartCount();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,20 +28,21 @@ const OrdersScreen = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const [data, categories] = await Promise.all([
+      const [orderData, categories] = await Promise.all([
         getOrders(),
         getAllCategories()
       ]);
       
-      // Map categories to order items
-      const enrichedOrders = data.map(order => ({
+      const enrichedOrders = orderData.map((order: Order) => ({
         ...order,
-        items: order.items.map(item => {
+        items: order.items?.map(item => {
           const catId = item.categoryId || item.product?.categoryId;
-          const match = categories.find((c: any) => c.id === catId || c.category === catId || c.name === catId || c.title === catId);
+          const categoryMatch = categories.find((c: any) => c.id === catId || c.category === catId || c.name === catId || c.title === catId);
           return {
             ...item,
-            categoryName: match ? (match.title || match.name || match.category) : (item.product?.category || 'General')
+            categoryName: categoryMatch 
+              ? String(categoryMatch.title || categoryMatch.name || categoryMatch.category || 'General') 
+              : String(item.product?.category || 'Ordered')
           };
         })
       }));
@@ -56,169 +56,135 @@ const OrdersScreen = () => {
     }
   };
 
-  const renderOrderItem = ({ item }: { item: Order }) => {
-    const date = new Date(item.createdAt || item.created_at || '').toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
+  const handleReorder = (order: Order) => {
+    order.items?.forEach(item => {
+      addToCartOptimistic({
+        id: item.productId || item.product?.id || item.id,
+        name: item.productTitle || item.product?.name || 'Product',
+        price: item.priceAtPurchase || item.price || item.product?.price || 0,
+        image: item.productImage || item.product?.image || '',
+        weight: item.product?.weight || 'Unit',
+        category: item.categoryName || 'General'
+      });
     });
-
-    return (
-      <View className="order-card">
-        <View className="order-header">
-          <View>
-            <Text className="order-date">{date}</Text>
-            <Text className="order-id">Order #{item.id.slice(0, 8).toUpperCase()}</Text>
-          </View>
-          <View className={`status-badge status${item.status}`}>
-            <Text className={`status-text statusText${item.status}`}>{item.status}</Text>
-          </View>
-        </View>
-
-        <View className="items-preview">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {item.items?.map((orderItem, index) => (
-              <View key={orderItem.id || index} className="mini-item">
-                <Image 
-                  source={{ uri: orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/50' }} 
-                  className="mini-image" 
-                />
-                <Text className="mini-qty">x{orderItem.quantity}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View className="order-footer">
-          <Text className="total-label">Total: <Text className="total-amount">₹{item.totalAmount}</Text></Text>
-          <View className="action-buttons" style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity 
-              className="track-btn"
-              onPress={() => navigate('TRACK_ORDER', { orderId: item.id })}
-            >
-              <Text className="track-btn-text">Track</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="reorder-btn"
-              onPress={() => navigate('HOME')}
-            >
-              <Text className="reorder-btn-text">Order Again</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
+    showToast(`${order.items?.length} items added to cart!`, 'success');
   };
 
   return (
-    <div className="container">
-      <div className="header">
+    <div className="container" style={{ backgroundColor: '#F9FBF9' }}>
+      <div className="header" style={{ borderBottom: '1px solid #eee' }}>
         <button
-          onClick={() => {
-            if (categoryData?.from === 'PROFILE') {
-              navigate('PROFILE');
-            } else {
-              navigate('HOME');
-            }
-          }}
+          onClick={() => navigate(categoryData?.from === 'PROFILE' ? 'PROFILE' : 'HOME')}
           className="back-button"
-          aria-label="Go back"
         >
           <span className="back-icon">←</span>
         </button>
-        <h1 className="header-title">Order History</h1>
+        <div className="header-info" style={{ marginLeft: 5 }}>
+          <h1 className="header-title" style={{ fontSize: 22 }}>Order History</h1>
+        </div>
       </div>
 
-      <div className="product-content" style={{ overflowY: 'visible', height: 'auto', flex: 1 }}>
-        <div className="content-wrapper" style={{ maxWidth: '100%' }}>
+      <div className="product-content" style={{ overflowY: 'auto', height: 'auto', flex: 1 }}>
+        <div className="content-wrapper" style={{ padding: '24px 16px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
           {loading ? (
-            <div className="center-container">
+            <div className="center-container" style={{ height: 400 }}>
               <ActivityIndicator size="large" color="#2E7D32" />
               <p style={{ marginTop: 15, color: '#666', fontWeight: 600 }}>Fetching your order history...</p>
             </div>
           ) : error ? (
             <div className="center-container">
               <p style={{ color: '#d32f2f', textAlign: 'center', marginBottom: 20 }}>{error}</p>
-              <button className="reorder-btn" onClick={fetchOrders}>
+              <button className="reorder-btn" style={{ padding: '12px 24px' }} onClick={fetchOrders}>
                 <span className="reorder-btn-text">Retry Loading</span>
               </button>
             </div>
           ) : orders.length === 0 ? (
-            <div className="center-container" style={{ paddingTop: 80 }}>
+            <div className="center-container" style={{ height: 500 }}>
               <span style={{ fontSize: 64, marginBottom: 20, opacity: 0.3 }}>📦</span>
-              <h2 style={{ fontSize: 20, color: '#333', fontWeight: 700 }}>No orders found</h2>
-              <button className="reorder-btn" style={{ marginTop: 24 }} onClick={() => navigate('HOME')}>
+              <h2 style={{ fontSize: 20, color: '#333', fontWeight: 700 }}>No orders found yet</h2>
+              <button className="reorder-btn" style={{ marginTop: 24, padding: '16px 32px' }} onClick={() => navigate('HOME')}>
                 <span className="reorder-btn-text">Start Shopping</span>
               </button>
             </div>
           ) : (
-            <div className="list-wrapper">
-              {orders.map((item) => {
-                const date = new Date(item.createdAt || item.created_at || '').toLocaleDateString('en-IN', {
+            <div className="list-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {orders.map((order) => {
+                const date = new Date(order.createdAt || order.created_at || '').toLocaleDateString('en-IN', {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric'
                 });
 
                 return (
-                  <div key={item.id} className="order-card">
-                    <div className="order-header">
+                  <div key={order.id} className="order-card" style={{ 
+                    backgroundColor: '#fff', 
+                    borderRadius: 24, 
+                    padding: 24, 
+                    border: '1px solid #f0f0f0',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.03)'
+                  }}>
+                    {/* Card Top */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                       <div>
-                        <span className="order-date">{date}</span>
-                        <p className="order-id">Order ID: #{item.id.slice(0, 8).toUpperCase()}</p>
+                        <span style={{ fontSize: 13, color: '#888', fontWeight: 700 }}>{date}</span>
+                        <p style={{ fontSize: 13, color: '#1a1a1a', fontWeight: 900, marginTop: 2 }}>ID: #{order.id.slice(0, 8).toUpperCase()}</p>
                       </div>
-                      <div className={`status-badge status${item.status}`}>
-                        <span className="status-text">{item.status}</span>
+                      <div style={{ 
+                        backgroundColor: order.status === 'DELIVERED' ? '#E8F5E9' : '#E3F2FD', 
+                        padding: '6px 14px', 
+                        borderRadius: 50 
+                      }}>
+                        <span style={{ 
+                          fontSize: 11, 
+                          color: order.status === 'DELIVERED' ? '#2E7D32' : '#1976D2', 
+                          fontWeight: 800, 
+                          textTransform: 'uppercase' 
+                        }}>
+                          {order.status}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="items-preview">
-                      {item.items?.map((orderItem: any, index) => (
-                        <div key={orderItem.id || index} className="mini-item-container" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          <div className="mini-item">
+                    {/* Items Preview */}
+                    <div className="items-preview" style={{ marginBottom: 24, display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 10 }}>
+                      {order.items?.map((item: any, idx) => (
+                        <div key={item.id || idx} style={{ width: 80, flexShrink: 0 }}>
+                          <div style={{ position: 'relative', width: 80, height: 80, borderRadius: 16, border: '1px solid #f0f0f0', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <img 
-                              src={orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/64'} 
-                              className="mini-image" 
-                              alt={orderItem.productTitle || 'product'}
+                              src={item.productImage || item.product?.image || 'https://via.placeholder.com/80'} 
+                              style={{ width: 60, height: 60, objectFit: 'contain' }} 
+                              alt="product"
                             />
-                            <span className="mini-qty">x{orderItem.quantity}</span>
+                            <span style={{ position: 'absolute', top: -5, right: -5, width: 22, height: 22, backgroundColor: '#2E7D32', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800, border: '2px solid #fff' }}>
+                              {item.quantity}
+                            </span>
                           </div>
-                          <span style={{ fontSize: 10, color: '#2E7D32', fontWeight: 600, textAlign: 'center', backgroundColor: '#E8F5E9', padding: '2px 4px', borderRadius: 4 }}>
-                            {orderItem.categoryName}
-                          </span>
+                          <p style={{ fontSize: 9, color: '#888', fontWeight: 700, marginTop: 8, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.categoryName}
+                          </p>
                         </div>
                       ))}
                     </div>
 
-                    <div className="order-footer">
-                      <div className="total-container">
-                        <span className="total-label">Total Amount</span>
-                        <p className="total-amount">₹{item.totalAmount}</p>
+                    {/* Card Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f5f5f5', paddingTop: 20 }}>
+                      <div>
+                        <span style={{ fontSize: 12, color: '#888', fontWeight: 600 }}>Total Paid</span>
+                        <p style={{ fontSize: 20, color: '#1a1a1a', fontWeight: 900 }}>₹{order.totalAmount}</p>
                       </div>
-                      <div className="action-buttons" style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ display: 'flex', gap: 12 }}>
                         <button 
-                          className="track-btn"
-                          onClick={() => navigate('TRACK_ORDER', { orderId: item.id })}
+                          onClick={() => navigate('TRACK_ORDER', { orderId: order.id })}
+                          style={{ padding: '12px 20px', borderRadius: 14, backgroundColor: '#f5f5f5', border: 'none', cursor: 'pointer' }}
                         >
-                          <span className="track-btn-text">Track Order</span>
+                          <span style={{ fontSize: 14, color: '#333', fontWeight: 700 }}>Details</span>
                         </button>
                         <button 
+                          onClick={() => handleReorder(order)}
                           className="reorder-btn"
-                          onClick={() => {
-                            item.items?.forEach(orderItem => {
-                              addToCartOptimistic({
-                                id: orderItem.productId || orderItem.product?.id || orderItem.id,
-                                name: orderItem.productTitle,
-                                price: orderItem.price,
-                                image: orderItem.productImage,
-                                weight: orderItem.product?.weight || 'Unit',
-                                category: orderItem.categoryName
-                              });
-                            });
-                            showToast('Items added to cart!', 'success');
-                          }}
+                          style={{ padding: '12px 24px', borderRadius: 14, border: 'none', cursor: 'pointer' }}
                         >
-                          <span className="reorder-btn-text">Order Again</span>
+                          <span className="reorder-btn-text" style={{ fontSize: 14, fontWeight: 800 }}>Order Again</span>
                         </button>
                       </div>
                     </div>
@@ -233,6 +199,13 @@ const OrdersScreen = () => {
   );
 };
 
-
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+});
 
 export default OrdersScreen;

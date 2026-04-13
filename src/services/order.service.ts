@@ -20,6 +20,7 @@ export interface OrderItem {
     priceAtPurchase?: number;
     categoryId?: string;
     category?: any;
+    categoryName?: string;
     product?: Product;
 }
 
