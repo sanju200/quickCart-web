@@ -94,21 +94,57 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: #F1F8E9;
-  padding: 6px 14px;
-  border-radius: 12px;
+  background-color: #f7faf7;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid #edf2ed;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.location-container:hover {
+  background-color: #f0f7f0;
+  border-color: #2E7D32;
+  box-shadow: 0 4px 12px rgba(46,125,50,0.08);
 }
 
 .location-pin {
-  margin-right: 6px;
-  font-size: 14px;
+  margin-right: 12px;
+  font-size: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.location-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.location-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #2E7D32;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.address-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .address-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
   white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .profile-button {

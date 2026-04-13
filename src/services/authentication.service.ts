@@ -140,7 +140,7 @@ export const getUserData = async (): Promise<UserData | null> => {
 export const updateProfile = async (userData: UserData) => {
     try {
         const token = await getAuthToken();
-        const { id, name, ...updateData } = userData;
+        const { id, ...updateData } = userData;
         const response = await fetch(`${BASE_URL}/users/${id}`, {
             method: 'PUT',
             headers: {

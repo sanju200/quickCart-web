@@ -75,12 +75,24 @@ const Header = () => {
           {/* Right section: Location, Profile, Cart */}
           <div className="header-right-actions">
             {userRole === 'USER' && (
-              <div className="location-container">
+              <button 
+                className="location-container" 
+                onClick={() => navigate('SAVED_ADDRESSES')}
+                aria-label="Change location"
+              >
                 <span className="location-pin">📍</span>
-                <span className="address-text">
-                  {user?.addresses?.find((a: any) => a.isSelected)?.streetAddress || 'Set Location'} ⌄
-                </span>
-              </div>
+                <div className="location-info">
+                  <span className="location-label">Delivery to</span>
+                  <div className="address-wrapper">
+                    <span className="address-text">
+                      {user?.addresses?.find((a: any) => a.isSelected)?.streetAddress.split(',')[0] || 'Set Location'}
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+              </button>
             )}
             
             <button onClick={() => navigate('PROFILE')} className="profile-button" aria-label="Profile">
