@@ -4,6 +4,10 @@ import { Product } from './product.service';
 const BASE_URL = '';
 const API_URL = `${BASE_URL}/order`;
 
+// Cache promises to prevent duplicate calls
+let ordersPromise: { [key: string]: Promise<Order[]> } = {};
+let orderDetailPromises: { [key: string]: Promise<Order> } = {};
+
 export interface OrderItem {
     id: string;
     orderId?: string;
@@ -41,80 +45,105 @@ export interface Order {
 }
 
 export const getOrders = async (): Promise<Order[]> => {
-    try {
-        const user = await getUserData();
-        if (!user || !user.id) return [];
+    const user = await getUserData();
+    if (!user || !user.id) return [];
 
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+    const cacheKey = `user_${user.id}`;
+    if (ordersPromise[cacheKey]) return ordersPromise[cacheKey];
+
+    ordersPromise[cacheKey] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_URL}/user/${user.id}`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch orders (Status: ${response.status})`);
+            }
+
+            const orders = await response.json();
+
+            return orders.map((o: any) => ({
+                ...o,
+                createdAt: o.createdAt || o.created_at
+            })).sort((a: any, b: any) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+        } catch (error: any) {
+            console.error('Error fetching orders from API:', error);
+            delete ordersPromise[cacheKey];
+            return [];
+        } finally {
+            // Keep the promise in cache for a short period to handle rapid sequential calls
+            setTimeout(() => {
+                delete ordersPromise[cacheKey];
+            }, 1000);
         }
+    })();
 
-        const response = await fetch(`${API_URL}/user/${user.id}`, {
-            method: 'GET',
-            headers: headers,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch orders (Status: ${response.status})`);
-        }
-
-        const orders = await response.json();
-
-        return orders.map((o: any) => ({
-            ...o,
-            createdAt: o.createdAt || o.created_at
-        })).sort((a: any, b: any) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-    } catch (error: any) {
-        console.error('Error fetching orders from API:', error);
-        return [];
-    }
+    return ordersPromise[cacheKey];
 };
 
 export const getAllOrders = async (params?: { status?: string; assignedDeliveryPartnerId?: string }): Promise<Order[]> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+    const cacheKey = `all_${JSON.stringify(params || {})}`;
+    if (ordersPromise[cacheKey]) return ordersPromise[cacheKey];
+
+    ordersPromise[cacheKey] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            let url = API_URL;
+            const queryParams = new URLSearchParams();
+            if (params?.status) queryParams.append('status', params.status);
+            if (params?.assignedDeliveryPartnerId) queryParams.append('assignedDeliveryPartnerId', params.assignedDeliveryPartnerId);
+
+            const queryString = queryParams.toString();
+            if (queryString) url += `?${queryString}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch all orders (Status: ${response.status})`);
+            }
+
+            const orders = await response.json();
+            return orders.map((o: any) => ({
+                ...o,
+                createdAt: o.createdAt || o.created_at
+            }));
+        } catch (error: any) {
+            console.error('Error fetching all orders:', error);
+            delete ordersPromise[cacheKey];
+            return [];
+        } finally {
+            setTimeout(() => {
+                delete ordersPromise[cacheKey];
+            }, 1000);
         }
+    })();
 
-        let url = API_URL;
-        const queryParams = new URLSearchParams();
-        if (params?.status) queryParams.append('status', params.status);
-        if (params?.assignedDeliveryPartnerId) queryParams.append('assignedDeliveryPartnerId', params.assignedDeliveryPartnerId);
-
-        const queryString = queryParams.toString();
-        if (queryString) url += `?${queryString}`;
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: headers,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch all orders (Status: ${response.status})`);
-        }
-
-        const orders = await response.json();
-        return orders.map((o: any) => ({
-            ...o,
-            createdAt: o.createdAt || o.created_at
-        }));
-    } catch (error: any) {
-        console.error('Error fetching all orders:', error);
-        return [];
-    }
+    return ordersPromise[cacheKey];
 };
 
 export const updateOrderStatus = async (orderId: string, stage: 'process' | 'handover' | 'transit' | 'out-for-delivery' | 'delivered', data?: any): Promise<Order> => {
@@ -176,32 +205,43 @@ export const createOrder = async (orderData: any): Promise<Order> => {
 };
 
 export const getOrderDetails = async (orderId: string): Promise<Order> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+    if (orderDetailPromises[orderId]) return orderDetailPromises[orderId];
+
+    orderDetailPromises[orderId] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_URL}/${orderId}`, {
+                method: 'GET',
+                headers,
+            });
+
+            if (!response.ok) {
+                throw new Error('Order not found');
+            }
+
+            const order = await response.json();
+            return {
+                ...order,
+                createdAt: order.createdAt || order.created_at
+            };
+        } catch (error: any) {
+            console.error(`Error fetching order details for ${orderId}:`, error);
+            delete orderDetailPromises[orderId];
+            throw error;
+        } finally {
+            setTimeout(() => {
+                delete orderDetailPromises[orderId];
+            }, 1000);
         }
+    })();
 
-        const response = await fetch(`${API_URL}/${orderId}`, {
-            method: 'GET',
-            headers,
-        });
-
-        if (!response.ok) {
-            throw new Error('Order not found');
-        }
-
-        const order = await response.json();
-        return {
-            ...order,
-            createdAt: order.createdAt || order.created_at
-        };
-    } catch (error: any) {
-        console.error(`Error fetching order details for ${orderId}:`, error);
-        throw error;
-    }
+    return orderDetailPromises[orderId];
 };

@@ -111,7 +111,7 @@ const Categories = () => {
           <h2 style={styles.headerTitle}>Shop by Category</h2>
         </div>
         <button
-          onClick={() => navigate('CATEGORY_PRODUCTS', { category: 'all' })}
+          onClick={() => navigate('CATEGORY_PRODUCTS', { category: 'all', allCategories: gridCategories })}
           style={styles.seeAllBtn}
         >
           Explore All Categories
@@ -127,7 +127,7 @@ const Categories = () => {
             <div
               key={item.id}
               style={styles.gridItem}
-              onClick={() => navigate('CATEGORY_PRODUCTS', { category: catValue })}
+              onClick={() => navigate('CATEGORY_PRODUCTS', { category: catValue, allCategories: gridCategories })}
             >
               <div style={{ ...styles.iconBox, backgroundColor: bgColor }}>
                 <span style={styles.gridIcon}>{item.icon || '📦'}</span>

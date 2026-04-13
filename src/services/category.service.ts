@@ -13,33 +13,46 @@ export interface Category {
     bgColor?: string;
 }
 
+let categoriesPromise: Promise<Category[]> | null = null;
+
 export const getAllCategories = async (): Promise<Category[]> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+    if (categoriesPromise) return categoriesPromise;
 
-        const response = await fetch(API_URL, {
-            method: 'GET',
-            headers: headers,
-        });
+    categoriesPromise = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch categories (Status: ${response.status})`);
+            const response = await fetch(API_URL, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch categories (Status: ${response.status})`);
+            }
+            const data = await response.json();
+            const categories = Array.isArray(data) ? data : [];
+            return [{ id: 'all', title: 'All', category: 'all', icon: '🌟' } as any, ...categories];
+        } catch (error: any) {
+            console.error('Error fetching categories:', error);
+            categoriesPromise = null;
+            throw error;
+        } finally {
+            // Keep the promise for 1 second to handle rapid sequential calls
+            setTimeout(() => {
+                categoriesPromise = null;
+            }, 1000);
         }
-        const data = await response.json();
-        const categories = Array.isArray(data) ? data : [];
-        return [{ id: 'all', title: 'All', category: 'all', icon: '🌟' } as any, ...categories];
-    } catch (error: any) {
-        console.error('Error fetching categories:', error);
-        throw error;
-    }
+    })();
+
+    return categoriesPromise;
 };
 
 export const createCategory = async (categoryData: Omit<Category, 'id'>): Promise<Category> => {
