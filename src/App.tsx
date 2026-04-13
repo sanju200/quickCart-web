@@ -66,6 +66,7 @@ function App() {
     visible: false,
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -177,12 +178,19 @@ function App() {
   }
 
   return (
-    <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar }}>
+    <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar, isLoading, setIsLoading }}>
       <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart }}>
         <Sidebar />
         <div className="app-wrapper">
           <AppContent fadeAnim={fadeAnim} />
         </div>
+        
+        {isLoading && (
+          <div className="global-loader-overlay">
+            <div className="premium-spinner"></div>
+          </div>
+        )}
+        
         <ToastNotification
           message={toast.message}
           type={toast.type}
@@ -208,9 +216,9 @@ function AppContent({ fadeAnim }: { fadeAnim: Animated.Value }) {
       overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible' 
     }}>
       {showHeader && <Header />}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
+      <Animated.View style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0, opacity: fadeAnim }}>
         <AppScreen currentScreen={currentScreen} />
-      </div>
+      </Animated.View>
     </div>
   );
 }

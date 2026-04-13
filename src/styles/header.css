@@ -1,19 +1,20 @@
 /* Header Styles */
 .header-outer-container {
   background-color: #fff;
-  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: center;
   width: 100%;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  z-index: 1001;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-sizing: border-box;
 }
 
 .header-container {
   width: 100%;
   padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .header-top-bar {

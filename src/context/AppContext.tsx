@@ -10,6 +10,8 @@ interface NavigationContextType {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 export const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
