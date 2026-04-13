@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppNavigation } from '../context/AppContext';
 import { loginUser } from '../services/authentication.service';
@@ -12,6 +12,7 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' as 'success' | 'error' | 'info' });
+  const passwordRef = useRef<any>(null);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     setToast({ visible: true, message, type });
@@ -57,6 +58,9 @@ const LoginScreen = () => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            blurOnSubmit={false}
           />
           
           <Text style={styles.label}>Password</Text>
@@ -66,7 +70,10 @@ const LoginScreen = () => {
               placeholder="Enter your password"
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={setPassword}
+            onChangeText={setPassword}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              ref={passwordRef}
             />
             <TouchableOpacity 
               style={styles.eyeIcon} 

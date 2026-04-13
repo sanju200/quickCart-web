@@ -12,12 +12,12 @@ import {
 import { useAppNavigation, useCartCount } from '../context/AppContext';
 import { Product } from '../services/product.service';
 import { getOrders, Order, OrderItem } from '../services/order.service';
-import { addToCart, handleCartQuantityChange, CartItem } from '../services/cart.service';
+import { getAllCategories } from '../services/category.service';
 import ProductCard from './ProductCard';
 
 const PreviouslyOrderedProducts = () => {
   const { navigate } = useAppNavigation();
-  const { cartItems, refreshCartCount } = useCartCount();
+  const { cartItems, addToCartOptimistic, updateQtyOptimistic } = useCartCount();
   const { width } = useWindowDimensions();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,10 @@ const PreviouslyOrderedProducts = () => {
   const fetchPreviouslyOrdered = async () => {
     try {
       setLoading(true);
-      const orders = await getOrders();
+      const [orders, categories] = await Promise.all([
+        getOrders(),
+        getAllCategories()
+      ]);
       
       const productMap = new Map<string, Product>();
       
@@ -40,13 +43,18 @@ const PreviouslyOrderedProducts = () => {
           const productKey = productId || orderItem.productTitle || orderItem.id;
           
           if (productKey && !productMap.has(productKey)) {
+            // Find category name from categoryId by checking multiple possible fields
+            const catId = orderItem.categoryId || orderItem.product?.categoryId;
+            const categoryMatch = categories.find((c: any) => c.id === catId || c.category === catId || c.name === catId || c.title === catId);
+            const categoryName = categoryMatch ? (categoryMatch.title || categoryMatch.name || categoryMatch.category) : (orderItem.product?.category || 'Ordered');
+
             const product: Product = {
               id: productId || orderItem.id,
               name: orderItem.productTitle || orderItem.product?.name || 'Product',
               price: (orderItem.priceAtPurchase || orderItem.price || orderItem.product?.price || 0).toString(),
               image: orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/150',
               weight: orderItem.product?.weight || 'Unit',
-              category: orderItem.product?.category || 'ordered'
+              category: categoryName
             };
             productMap.set(productKey, product);
           }
@@ -63,40 +71,19 @@ const PreviouslyOrderedProducts = () => {
   };
 
   const getProductQuantity = (productId: string) => {
-    const item = cartItems.find((i: CartItem) => (i.productId || i.product?.id) === productId);
+    const item = cartItems.find((i: any) => (i.productId || i.product?.id) === productId);
     return item ? item.quantity : 0;
   };
 
   const handleAddToCart = async (product: Product) => {
-    try {
-      await addToCart(product.id, 1);
-      refreshCartCount();
-    } catch (err: any) {
-      alert(err.message || 'Failed to add item to cart');
-    }
+    addToCartOptimistic(product);
   };
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
-    try {
-      await handleCartQuantityChange(productId, currentQty + delta);
-      refreshCartCount();
-    } catch (err: any) {
-      console.error('Error updating cart:', err);
-      alert('Failed to update quantity');
-    }
+    updateQtyOptimistic(productId, delta);
   };
 
   const numColumns = width > 1200 ? 5 : width > 900 ? 4 : width > 600 ? 3 : 2;
-
-  const renderProductItem = ({ item }: { item: Product }) => (
-    <ProductCard
-      item={item}
-      quantity={getProductQuantity(item.id)}
-      onAdd={handleAddToCart}
-      onUpdateQuantity={handleUpdateQuantity}
-      numColumns={numColumns}
-    />
-  );
 
   return (
     <div className="container">
@@ -105,7 +92,7 @@ const PreviouslyOrderedProducts = () => {
            <span className="back-icon">←</span>
         </button>
         <div className="header-info">
-          <h1 className="header-title">Previously Ordered</h1>
+          <h1 className="header-title">Regular Purchases</h1>
           <span className="version-text" style={{ marginTop: 0, marginLeft: 8 }}>{products.length} items found</span>
         </div>
       </div>
@@ -142,11 +129,22 @@ const PreviouslyOrderedProducts = () => {
             ))}
             
             {products.length === 0 && (
-              <div style={{ gridColumn: `1 / span ${numColumns}`, textAlign: 'center', paddingTop: 80 }}>
-                <span style={{ fontSize: 64, marginBottom: 20, opacity: 0.3, display: 'block' }}>📦</span>
-                <h2 style={{ fontSize: 20, color: '#333', fontWeight: 700 }}>No previous orders found</h2>
-                <button className="reorder-btn" style={{ marginTop: 24 }} onClick={() => navigate('HOME')}>
-                  <span className="reorder-btn-text">Browse Products</span>
+              <div style={{ gridColumn: `1 / span ${numColumns}`, textAlign: 'center', paddingTop: 100, paddingBottom: 100 }}>
+                <div style={{ 
+                  width: 120, height: 120, borderRadius: 60, backgroundColor: '#f0f0f0', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  margin: '0 auto 24px', fontSize: 60 
+                }}>🛒</div>
+                <h2 style={{ fontSize: 24, color: '#1a1a1a', fontWeight: 800 }}>Start your shopping journey!</h2>
+                <p style={{ fontSize: 16, color: '#666', marginTop: 12, maxWidth: 400, margin: '12px auto 32px' }}>
+                  Items you order regularly will appear here for quick access. Let's find something you love!
+                </p>
+                <button 
+                  className="track-btn" 
+                  style={{ display: 'inline-flex', padding: '16px 32px', borderRadius: 16 }} 
+                  onClick={() => navigate('HOME')}
+                >
+                  <span className="track-btn-text">Explore Products</span>
                 </button>
               </div>
             )}

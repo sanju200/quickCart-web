@@ -3,6 +3,9 @@ import { getAuthToken } from './authentication.service';
 const BASE_URL = '';
 const API_URL = `${BASE_URL}/product`;
 
+// Cache promises to prevent duplicate calls
+let productsPromise: { [key: string]: Promise<Product[]> } = {};
+
 export interface CategoryObject {
     id?: string;
     title?: string;
@@ -33,105 +36,141 @@ export const getCategoryName = (product: Product): string => {
 };
 
 export const getFilteredProducts = async (category?: string, search?: string, tag?: string): Promise<Product[]> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+    const cacheKey = `filtered_${category}_${search}_${tag}`;
+    if (productsPromise[cacheKey]) return productsPromise[cacheKey];
 
-        let url = API_URL;
-        const params = new URLSearchParams();
-        if (category && category !== 'all') {
-            params.append('category', category);
-        }
-        if (search) {
-            params.append('search', search);
-        }
-        if (tag) {
-            params.append('tag', tag);
-        }
+    productsPromise[cacheKey] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-        const queryString = params.toString();
-        if (queryString) {
-            url += `?${queryString}`;
+            let url = API_URL;
+            const params = new URLSearchParams();
+            if (category && category !== 'all') {
+                params.append('category', category);
+            }
+            if (search) {
+                params.append('search', search);
+            }
+            if (tag) {
+                params.append('tag', tag);
+            }
+
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            console.log('Fetching products from:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
+            }
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        } catch (error: any) {
+            console.error('Error fetching filtered products:', error);
+            delete productsPromise[cacheKey];
+            throw error;
+        } finally {
+            setTimeout(() => {
+                delete productsPromise[cacheKey];
+            }, 1000);
         }
+    })();
 
-        console.log('Fetching products from:', url);
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: headers,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
-        }
-        const data = await response.json();
-        return Array.isArray(data) ? data : [];
-    } catch (error: any) {
-        console.error('Error fetching filtered products:', error);
-        throw error;
-    }
+    return productsPromise[cacheKey];
 };
 
 export const getAllProducts = async (): Promise<Product[]> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+    const cacheKey = 'all_products';
+    if (productsPromise[cacheKey]) return productsPromise[cacheKey];
 
-        const response = await fetch(API_URL, {
-            method: 'GET',
-            headers: headers,
-        });
+    productsPromise[cacheKey] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
+            const response = await fetch(API_URL, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
+            }
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        } catch (error: any) {
+            console.error('Error fetching products:', error);
+            delete productsPromise[cacheKey];
+            throw error;
+        } finally {
+            setTimeout(() => {
+                delete productsPromise[cacheKey];
+            }, 1000);
         }
-        const data = await response.json();
-        return Array.isArray(data) ? data : [];
-    } catch (error: any) {
-        console.error('Error fetching products:', error);
-        throw error;
-    }
+    })();
+
+    return productsPromise[cacheKey];
 };
 
 export const getProductsByCategory = async (category: string): Promise<Product[]> => {
-    try {
-        const token = await getAuthToken();
-        const headers: any = {
-            'Content-Type': 'application/json',
-        };
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+    const cacheKey = `category_${category}`;
+    if (productsPromise[cacheKey]) return productsPromise[cacheKey];
 
-        const response = await fetch(`${API_URL}/category/${category}`, {
-            method: 'GET',
-            headers: headers,
-        });
+    productsPromise[cacheKey] = (async () => {
+        try {
+            const token = await getAuthToken();
+            const headers: any = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch category products (Status: ${response.status})`);
+            const response = await fetch(`${API_URL}/category/${category}`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch category products (Status: ${response.status})`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error: any) {
+            console.error(`Error fetching products for category ${category}:`, error);
+            delete productsPromise[cacheKey];
+            throw error;
+        } finally {
+            setTimeout(() => {
+                delete productsPromise[cacheKey];
+            }, 1000);
         }
-        const data = await response.json();
-        return data;
-    } catch (error: any) {
-        console.error(`Error fetching products for category ${category}:`, error);
-        throw error;
-    }
+    })();
+
+    return productsPromise[cacheKey];
 };
 
 export const updateProductStock = async (productId: string, stock: number): Promise<Product> => {

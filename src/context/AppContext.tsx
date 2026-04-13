@@ -10,6 +10,8 @@ interface NavigationContextType {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 export const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -19,6 +21,8 @@ interface CartContextType {
   cartCount: number;
   refreshCartCount: () => Promise<void>;
   resetCart: () => void;
+  addToCartOptimistic: (product: any) => Promise<void>;
+  updateQtyOptimistic: (productId: string, delta: number) => Promise<void>;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);

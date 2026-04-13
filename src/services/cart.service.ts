@@ -4,6 +4,9 @@ import { Product } from './product.service';
 const BASE_URL = '';
 const API_URL = `${BASE_URL}/cart`;
 
+// Cache promises to prevent duplicate calls
+let cartPromise: { [key: string]: Promise<CartItem[]> } = {};
+
 export interface CartItem {
     id: string;
     productId: string;
@@ -64,31 +67,44 @@ export const updateCartQuantity = async (productId: string, quantity: number) =>
 };
 
 export const getCart = async (): Promise<CartItem[]> => {
-    try {
-        const user = await getUserData();
-        if (!user || !user.id) return [];
+    const user = await getUserData();
+    if (!user || !user.id) return [];
 
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/${user.id}`, {
-            method: 'GET',
-            headers: headers,
-        });
+    const cacheKey = user.id;
+    if (cartPromise[cacheKey]) return cartPromise[cacheKey];
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch cart (Status: ${response.status})`);
+    cartPromise[cacheKey] = (async () => {
+        try {
+            const headers = await getHeaders();
+            const response = await fetch(`${API_URL}/${user.id}`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch cart (Status: ${response.status})`);
+            }
+            const data = await response.json();
+            const items = Array.isArray(data) ? data : data.items || [];
+
+            return items.map((item: any) => ({
+                ...item,
+                productId: item.productId || item.product?.id || item.product?._id || item.id || item._id
+            }));
+        } catch (error: any) {
+            console.error('Error fetching cart:', error);
+            delete cartPromise[cacheKey];
+            throw error;
+        } finally {
+            // Keep the promise in cache for a short period to handle rapid sequential calls
+            setTimeout(() => {
+                delete cartPromise[cacheKey];
+            }, 1000);
         }
-        const data = await response.json();
-        const items = Array.isArray(data) ? data : data.items || [];
+    })();
 
-        return items.map((item: any) => ({
-            ...item,
-            productId: item.productId || item.product?.id || item.product?._id || item.id || item._id
-        }));
-    } catch (error: any) {
-        console.error('Error fetching cart:', error);
-        throw error;
-    }
+    return cartPromise[cacheKey];
 };
 
 export const addToCart = async (productId: string, quantity: number = 1) => {

@@ -8,7 +8,7 @@ import { useAppNavigation, useCartCount } from '../context/AppContext';
 import { getAllProducts, Product, getCategoryName } from '../services/product.service';
 import { addToCart, handleCartQuantityChange, CartItem } from '../services/cart.service';
 import { getOrders, Order, OrderItem } from '../services/order.service';
-import { getAllCategories } from '../services/category.service';
+import { getAllCategories, Category } from '../services/category.service';
 import ProductCard from './ProductCard';
 
 const CATEGORY_TABS = [
@@ -27,7 +27,7 @@ const BG_COLORS = ['#E8F5E9', '#E3F2FD', '#FFF3E0', '#FCE4EC', '#F3E5F5', '#EFEB
 const Categories = () => {
   const [activeTab, setActiveTab] = useState('1');
   const { navigate } = useAppNavigation();
-  const { cartItems, refreshCartCount } = useCartCount();
+  const { cartItems, addToCartOptimistic, updateQtyOptimistic } = useCartCount();
   const [recentlyOrdered, setRecentlyOrdered] = useState<Product[]>([]);
   const [gridCategories, setGridCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,32 +52,33 @@ const Categories = () => {
   };
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
-    try {
-      await handleCartQuantityChange(productId, currentQty + delta);
-      refreshCartCount();
-    } catch (err: any) {
-      console.error('Error updating cart:', err);
-      Alert.alert('Error', 'Failed to update quantity');
-    }
+    updateQtyOptimistic(productId, delta);
   };
 
   const fetchRecentlyOrdered = async () => {
     try {
       setLoading(true);
-      const orders = await getOrders();
+      const [orders, categories] = await Promise.all([
+        getOrders(),
+        getAllCategories()
+      ]);
       const productMap = new Map<string, Product>();
       orders.forEach((order: Order) => {
-        order.items?.forEach((orderItem: OrderItem) => {
+        order.items?.forEach((orderItem: any) => {
           const productId = orderItem.productId || orderItem.product?.id;
           const productKey = productId || orderItem.productTitle || orderItem.id;
           if (productKey && !productMap.has(productKey)) {
+            const catId = orderItem.categoryId || orderItem.product?.categoryId;
+            const match = categories.find((c: Category) => c.id === catId || c.category === catId || c.name === catId || c.title === catId);
+            const categoryName = match ? (match.title || match.name || match.category) : (orderItem.product?.category || 'Ordered');
+
             const product: Product = {
               id: productId || orderItem.id,
               name: orderItem.productTitle || orderItem.product?.name || 'Product',
               price: (orderItem.priceAtPurchase || orderItem.price || orderItem.product?.price || 0).toString(),
               image: orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/150',
-              weight: orderItem.product?.weight || 'Unit',
-              category: orderItem.product?.category || 'General'
+              weight: orderItem.weight || orderItem.product?.weight || 'Unit',
+              category: categoryName
             };
             productMap.set(productKey, product);
           }
@@ -94,12 +95,7 @@ const Categories = () => {
   };
 
   const handleAddToCart = async (product: Product) => {
-    try {
-      await addToCart(product.id, 1);
-      refreshCartCount();
-    } catch (err: any) {
-      Alert.alert('Error', err.message || 'Failed to add item to cart');
-    }
+    addToCartOptimistic(product);
   };
 
   return (
@@ -111,7 +107,7 @@ const Categories = () => {
           <h2 style={styles.headerTitle}>Shop by Category</h2>
         </div>
         <button
-          onClick={() => navigate('CATEGORY_PRODUCTS', { category: 'all' })}
+          onClick={() => navigate('CATEGORY_PRODUCTS', { category: 'all', allCategories: gridCategories })}
           style={styles.seeAllBtn}
         >
           Explore All Categories
@@ -127,7 +123,7 @@ const Categories = () => {
             <div
               key={item.id}
               style={styles.gridItem}
-              onClick={() => navigate('CATEGORY_PRODUCTS', { category: catValue })}
+              onClick={() => navigate('CATEGORY_PRODUCTS', { category: catValue, allCategories: gridCategories })}
             >
               <div style={{ ...styles.iconBox, backgroundColor: bgColor }}>
                 <span style={styles.gridIcon}>{item.icon || '📦'}</span>

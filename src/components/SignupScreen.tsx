@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppNavigation } from '../context/AppContext';
 import { signupUser, loginUser } from '../services/authentication.service';
@@ -13,6 +13,8 @@ const SignupScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' as 'success' | 'error' | 'info' });
+  const emailRef = useRef<any>(null);
+  const passwordRef = useRef<any>(null);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     setToast({ visible: true, message, type });
@@ -57,6 +59,9 @@ const SignupScreen = () => {
             placeholder="Enter your name"
             value={name}
             onChangeText={setName}
+            returnKeyType="next"
+            onSubmitEditing={() => emailRef.current?.focus()}
+            blurOnSubmit={false}
           />
 
           <Text style={styles.label}>Email Address</Text>
@@ -67,6 +72,10 @@ const SignupScreen = () => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            blurOnSubmit={false}
+            ref={emailRef}
           />
           
           <Text style={styles.label}>Password</Text>
@@ -77,6 +86,9 @@ const SignupScreen = () => {
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              returnKeyType="done"
+              onSubmitEditing={handleSignup}
+              ref={passwordRef}
             />
             <TouchableOpacity 
               style={styles.eyeIcon} 

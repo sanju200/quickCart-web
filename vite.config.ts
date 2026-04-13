@@ -49,38 +49,47 @@ export default defineConfig({
       '/auth': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/cart': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/categories': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/product': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/order': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/offer': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/admin': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/users': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
       '/api': {
         target: 'https://quickcart-backend-production-e087.up.railway.app',
         changeOrigin: true,
+        bypass: (req) => { if (req.headers.accept?.includes('text/html')) return '/index.html'; }
       },
     },
   },

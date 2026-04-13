@@ -9,25 +9,23 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { handleCartQuantityChange } from '../services/cart.service';
+// Keep existing imports if any or remove the line if empty
+import { getUserData, UserData } from '../services/authentication.service';
 
 const CartScreen = () => {
   const { navigate } = useAppNavigation();
-  const { cartItems: items, refreshCartCount } = useCartCount();
+  const { cartItems: items, refreshCartCount, updateQtyOptimistic } = useCartCount();
   const [loading] = useState(false);
   const [error] = useState<string | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     refreshCartCount();
+    getUserData().then(data => setUser(data));
   }, []);
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
-    try {
-      await handleCartQuantityChange(productId, currentQty + delta);
-      await refreshCartCount();
-    } catch (err: any) {
-      console.error('Error updating cart:', err);
-    }
+    updateQtyOptimistic(productId, delta);
   };
 
   const calculateSubtotal = () => {
@@ -47,11 +45,12 @@ const CartScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigate('HOME')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigate('CATEGORY_PRODUCTS')} style={styles.backButton}>
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Review Cart</Text>
-      </View>      <View style={styles.scrollContent}>
+      </View>
+      <View style={styles.scrollContent}>
         <View style={styles.contentWrapper}>
           {loading ? (
             <View style={styles.centerContainer}>
@@ -78,7 +77,16 @@ const CartScreen = () => {
                     <View style={styles.itemInfo}>
                       <Text style={styles.itemName}>{item.product?.name || 'Unknown Product'}</Text>
                       <Text style={styles.itemWeight}>{item.product?.weight}</Text>
-                      <Text style={styles.itemPrice}>₹{item.product?.price}</Text>
+                      <Text style={styles.itemPrice}>
+                        ₹{item.product?.price}
+                        {item.quantity > 1 && (
+                          <Text style={styles.itemPriceTotal}>
+                            {' '} x {item.quantity} = ₹{(typeof item.product?.price === 'string' 
+                              ? parseFloat(item.product.price.replace(/[^\d.]/g, '')) 
+                              : typeof item.product?.price === 'number' ? item.product.price : 0) * item.quantity}
+                          </Text>
+                        )}
+                      </Text>
                     </View>
                     <View style={styles.quantityControl}>
                       <TouchableOpacity 
@@ -140,23 +148,35 @@ const CartScreen = () => {
 
       {items.length > 0 && (
         <View style={styles.checkoutBarContainer}>
-          <View style={styles.checkoutBar}>
-            <TouchableOpacity 
-              style={styles.paymentMethodSection} 
-              onPress={() => navigate('PAYMENTS', { items: items, total: total })}
-            >
-              <View style={styles.paymentInfo}>
-                <Text style={styles.checkoutTotal}>₹{total}</Text>
-                <View style={styles.paymentMethodLabel}>
-                  <Text style={styles.paymentMethodText}>Google Pay</Text>
-                  <Text style={styles.paymentDropdownIcon}> ⌄</Text>
+          {user?.addresses?.some(addr => addr.isSelected) ? (
+            <View style={styles.checkoutBar}>
+              <TouchableOpacity 
+                style={styles.paymentMethodSection} 
+                onPress={() => navigate('PAYMENTS', { items: items, total: total })}
+              >
+                <View style={styles.paymentInfo}>
+                  <Text style={styles.checkoutTotal}>₹{total}</Text>
+                  <View style={styles.paymentMethodLabel}>
+                    <Text style={styles.paymentMethodText}>Google Pay</Text>
+                    <Text style={styles.paymentDropdownIcon}> ⌄</Text>
+                  </View>
                 </View>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.payBtn} onPress={() => navigate('PAYMENTS', { items: items, total: total })}>
+                <Text style={styles.payBtnText}>Proceed to Pay →</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.checkoutBar}>
+              <View style={[styles.paymentMethodSection, { flex: 0.8 }]}>
+                 <Text style={{ fontSize: 13, color: '#d32f2f', fontWeight: 'bold' }}>Delivery address required</Text>
+                 <Text style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Please select an address to continue checkout.</Text>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.payBtn} onPress={() => navigate('PAYMENTS', { items: items, total: total })}>
-              <Text style={styles.payBtnText}>Proceed to Pay →</Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity style={[styles.payBtn, { backgroundColor: '#FF9800', paddingHorizontal: 20 }]} onPress={() => navigate('SAVED_ADDRESSES', { from: 'CART' })}>
+                <Text style={styles.payBtnText}>Select Address</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>
@@ -250,6 +270,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginTop: 4,
+  },
+  itemPriceTotal: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '400',
   },
   quantityControl: {
     flexDirection: 'row',
