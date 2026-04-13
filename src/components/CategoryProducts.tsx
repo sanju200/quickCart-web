@@ -4,7 +4,7 @@ import {
   useWindowDimensions
 } from 'react-native';
 import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { getFilteredProducts, Product } from '../services/product.service';
+import { getFilteredProducts, Product, getCategoryName } from '../services/product.service';
 import { getAllCategories } from '../services/category.service';
 import { addToCart, handleCartQuantityChange, CartItem } from '../services/cart.service';
 import ProductCard from './ProductCard';
@@ -17,6 +17,7 @@ const CategoryProducts = () => {
   const { cartItems, refreshCartCount } = useCartCount();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedSideCategory, setSelectedSideCategory] = useState(categoryData?.category || 'all');
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [catLoading, setCatLoading] = useState(true);
@@ -29,6 +30,14 @@ const CategoryProducts = () => {
   useEffect(() => {
     const fetchCats = async () => {
       try {
+        // If categories were passed through navigation, use them instead of re-fetching
+        if (categoryData?.allCategories && Array.isArray(categoryData.allCategories) && categoryData.allCategories.length > 0) {
+          console.log('[CategoryProducts] Using passed categories data');
+          setCategories(categoryData.allCategories);
+          return;
+        }
+
+        console.log('[CategoryProducts] Fetching categories from API');
         const data = await getAllCategories();
         setCategories(data);
       } catch (err) {
@@ -38,15 +47,53 @@ const CategoryProducts = () => {
       }
     };
     fetchCats();
+  }, [categoryData?.allCategories]);
+
+  const fetchAllProducts = async () => {
+    try {
+      setLoading(true);
+      // Fetch all products without server-side filters
+      const data = await getFilteredProducts(); 
+      setAllProducts(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllProducts();
   }, []);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchProducts(selectedSideCategory, localSearch);
-    }, 500);
+    // Perform local filtering
+    let filtered = [...allProducts];
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [selectedSideCategory, localSearch]);
+    // Filter by Category
+    if (selectedSideCategory && selectedSideCategory !== 'all') {
+      filtered = filtered.filter(p => {
+        const catName = getCategoryName(p).toLowerCase();
+        const catId = p.categoryId;
+        
+        // Match by ID or by Name/Tag
+        return catId === selectedSideCategory || 
+               catName === selectedSideCategory.toLowerCase();
+      });
+    }
+
+    // Filter by Search
+    if (localSearch.trim()) {
+      const query = localSearch.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        getCategoryName(p).toLowerCase().includes(query)
+      );
+    }
+
+    setProducts(filtered);
+  }, [allProducts, selectedSideCategory, localSearch]);
 
   useEffect(() => {
     if (categoryData?.search !== undefined) {
@@ -57,17 +104,8 @@ const CategoryProducts = () => {
     }
   }, [categoryData?.search, categoryData?.category]);
 
-  const fetchProducts = async (category?: string, search?: string) => {
-    try {
-      setLoading(true);
-      const data = await getFilteredProducts(category, search);
-      setProducts(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load products');
-    } finally {
-      setLoading(false);
-    }
+  const handleRetry = () => {
+    fetchAllProducts();
   };
 
   const getProductQuantity = (productId: string) => {
@@ -141,7 +179,7 @@ const CategoryProducts = () => {
           ) : error ? (
             <div className="center-container">
               <p style={{ color: '#d32f2f', textAlign: 'center', marginBottom: 20 }}>{error}</p>
-              <button className="track-btn" style={{ backgroundColor: '#2E7D32' }} onClick={() => fetchProducts(selectedSideCategory, localSearch)}>
+              <button className="track-btn" style={{ backgroundColor: '#2E7D32' }} onClick={handleRetry}>
                 <span style={{ color: '#fff', fontWeight: 'bold' }}>Retry</span>
               </button>
             </div>
