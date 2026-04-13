@@ -9,13 +9,15 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useCartCount } from '../context/AppContext';
 import { getOrders, Order } from '../services/order.service';
+import { getAllCategories } from '../services/category.service';
 import '../styles/common.css';
 import '../styles/components.css';
 
 const OrdersScreen = () => {
-  const { navigate, categoryData } = useAppNavigation();
+  const { navigate, categoryData, showToast } = useAppNavigation();
+  const { cartItems, addToCartOptimistic, updateQtyOptimistic } = useCartCount();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +29,25 @@ const OrdersScreen = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const data = await getOrders();
-      setOrders(data);
+      const [data, categories] = await Promise.all([
+        getOrders(),
+        getAllCategories()
+      ]);
+      
+      // Map categories to order items
+      const enrichedOrders = data.map(order => ({
+        ...order,
+        items: order.items.map(item => {
+          const catId = item.categoryId || item.product?.categoryId;
+          const match = categories.find((c: any) => c.id === catId || c.category === catId || c.name === catId || c.title === catId);
+          return {
+            ...item,
+            categoryName: match ? (match.title || match.name || match.category) : (item.product?.category || 'General')
+          };
+        })
+      }));
+
+      setOrders(enrichedOrders);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load order history');
@@ -154,14 +173,19 @@ const OrdersScreen = () => {
                     </div>
 
                     <div className="items-preview">
-                      {item.items?.map((orderItem, index) => (
-                        <div key={orderItem.id || index} className="mini-item">
-                          <img 
-                            src={orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/64'} 
-                            className="mini-image" 
-                            alt={(orderItem as any).productName || 'product'}
-                          />
-                          <span className="mini-qty">x{orderItem.quantity}</span>
+                      {item.items?.map((orderItem: any, index) => (
+                        <div key={orderItem.id || index} className="mini-item-container" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div className="mini-item">
+                            <img 
+                              src={orderItem.productImage || orderItem.product?.image || 'https://via.placeholder.com/64'} 
+                              className="mini-image" 
+                              alt={orderItem.productTitle || 'product'}
+                            />
+                            <span className="mini-qty">x{orderItem.quantity}</span>
+                          </div>
+                          <span style={{ fontSize: 10, color: '#2E7D32', fontWeight: 600, textAlign: 'center', backgroundColor: '#E8F5E9', padding: '2px 4px', borderRadius: 4 }}>
+                            {orderItem.categoryName}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -180,7 +204,19 @@ const OrdersScreen = () => {
                         </button>
                         <button 
                           className="reorder-btn"
-                          onClick={() => navigate('HOME')}
+                          onClick={() => {
+                            item.items?.forEach(orderItem => {
+                              addToCartOptimistic({
+                                id: orderItem.productId || orderItem.product?.id || orderItem.id,
+                                name: orderItem.productTitle,
+                                price: orderItem.price,
+                                image: orderItem.productImage,
+                                weight: orderItem.product?.weight || 'Unit',
+                                category: orderItem.categoryName
+                              });
+                            });
+                            showToast('Items added to cart!', 'success');
+                          }}
                         >
                           <span className="reorder-btn-text">Order Again</span>
                         </button>

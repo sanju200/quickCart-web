@@ -7,6 +7,7 @@ export interface Category {
     id: string;
     title: string;
     category: string;
+    name?: string;
     description?: string;
     image?: string;
     icon?: string;

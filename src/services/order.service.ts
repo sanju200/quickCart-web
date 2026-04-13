@@ -18,6 +18,8 @@ export interface OrderItem {
     price: string;
     totalAmount: string;
     priceAtPurchase?: number;
+    categoryId?: string;
+    category?: any;
     product?: Product;
 }
 
