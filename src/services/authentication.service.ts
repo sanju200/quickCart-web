@@ -56,7 +56,8 @@ export const loginUser = async (email: string, password: string) => {
 
         const userData: UserData = {
             id: data.id || data.user?.id || '',
-            name: data.name || data.user?.name || email.split('@')[0],
+            name: data.name || data.user?.name || 
+                  (data.firstName || data.user?.firstName ? `${data.firstName || data.user?.firstName} ${data.lastName || data.user?.lastName || ''}`.trim() : email.split('@')[0]),
             email: data.email || data.user?.email || email,
             phone: data.phone || data.user?.phone || '',
             role: data.role || data.user?.role || 'USER',
@@ -64,7 +65,7 @@ export const loginUser = async (email: string, password: string) => {
         };
 
         await saveUserData(userData);
-        return data;
+        return userData;
     } catch (error: any) {
         throw new Error(error.message || 'An error occurred during login');
     }
@@ -117,6 +118,18 @@ export const getUserData = async (): Promise<UserData | null> => {
     try {
         const data = await AsyncStorage.getItem('userData');
         const user = data ? JSON.parse(data) : null;
+        
+        // Normalize name field from firstName/lastName if missing in stored data
+        if (user && !user.name) {
+            if (user.firstName || user.lastName) {
+                user.name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            } else if (user.email) {
+                user.name = user.email.split('@')[0];
+            } else {
+                user.name = 'User';
+            }
+        }
+
         if (user && typeof user.addresses === 'string') {
             user.addresses = [{
                 type: 'Home',
@@ -143,8 +156,9 @@ export const updateProfile = async (userData: UserData) => {
         if (rest.addresses) updateData.addresses = rest.addresses;
         if (rest.phone) updateData.phone = rest.phone;
 
-        console.log('[DEBUG] Updating profile with payload:', updateData);
+        console.log('[DEBUG] Updating profile with payload:', updateData, 'using token:', !!token);
 
+        // Using specific user ID endpoint as requested
         const response = await fetch(`${BASE_URL}/users/${id}`, {
             method: 'PUT',
             headers: {
@@ -177,7 +191,7 @@ export const updateProfile = async (userData: UserData) => {
 
         const updatedUser: UserData = {
             id: data.id || userData.id,
-            name: data.name || userData.name,
+            name: data.name || (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : userData.name),
             email: data.email || userData.email,
             phone: data.phone || userData.phone,
             role: data.role || userData.role,
@@ -188,5 +202,40 @@ export const updateProfile = async (userData: UserData) => {
         return updatedUser;
     } catch (error: any) {
         throw new Error(error.message || 'An error occurred during update');
+    }
+};
+export const getMe = async (): Promise<UserData | null> => {
+    try {
+        const token = await getAuthToken();
+        if (!token) return null;
+
+        const response = await fetch(`${BASE_URL}/users/me`, {
+            method: 'GET',
+            headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            },
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                // If unauthorized, clear the session
+                await logoutUser();
+            }
+            return null;
+        }
+
+        const data = await response.json();
+        
+        // Normalize name field from firstName/lastName if missing
+        if (!data.name && (data.firstName || data.lastName)) {
+            data.name = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+        } else if (!data.name) {
+            data.name = data.email ? data.email.split('@')[0] : 'User';
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
     }
 };

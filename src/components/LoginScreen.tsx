@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useUser } from '../context/AppContext';
 import { loginUser } from '../services/authentication.service';
 import ToastNotification from './ToastNotification';
 
 const LoginScreen = () => {
   const { navigate } = useAppNavigation();
+  const { refreshUserData } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +27,9 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      await loginUser(email, password);
+      const userData = await loginUser(email, password);
+      // Immediately refresh user data to update the app state
+      await refreshUserData(userData);
       showToast('Login successful! Redirecting...', 'success');
       setTimeout(() => navigate('HOME'), 1200);
     } catch (err: any) {

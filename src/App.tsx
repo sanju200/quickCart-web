@@ -48,15 +48,18 @@ import UserManagerScreen from './components/UserManagerScreen';
 import SalesManagerScreen from './components/SalesManagerScreen';
 import NotFoundScreen from './components/NotFoundScreen';
 import ToastNotification from './components/ToastNotification';
-import { getAuthToken, getUserData } from './services/authentication.service';
+import { getAuthToken, getUserData, getMe } from './services/authentication.service';
 
-import { Screen, NavigationContext, CartContext } from './context/AppContext';
+import { Screen, NavigationContext, CartContext, UserContext } from './context/AppContext';
 import { getCart, addToCart, handleCartQuantityChange } from './services/cart.service';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('HOME');
   const [categoryData, setCategoryData] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
+  const cartTimers = useRef<{[key: string]: any}>({});
+  const lastRefreshedAt = useRef<number>(0);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState(0);
@@ -82,6 +85,20 @@ function App() {
     }
   };
 
+  const refreshUserData = async (manualData?: any) => {
+    if (manualData) {
+      setUserData(manualData);
+      if (manualData.role) setUserRole(manualData.role);
+    }
+  };
+
+  const updateUserDataLocal = (data: any) => {
+    if (data) {
+      setUserData(data);
+      if (data.role) setUserRole(data.role);
+    }
+  };
+
   const resetCart = () => {
     setCartItems([]);
     setCartCount(0);
@@ -100,17 +117,23 @@ function App() {
     setCartItems(updatedItems);
     setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
 
-    try {
-      // 2. Perform background API call
-      await addToCart(product.id, 1);
-      // 3. Re-sync with server to get real IDs and calculated totals
-      await refreshCartCount();
-    } catch (error) {
-      // 4. Rollback on failure
-      console.error('Optimistic add to cart failed:', error);
-      refreshCartCount(); // Re-sync to original state
-      showToast('Failed to add item to cart', 'error');
+    // Debounce API call
+    if (cartTimers.current[product.id]) {
+      clearTimeout(cartTimers.current[product.id]);
     }
+
+    cartTimers.current[product.id] = setTimeout(async () => {
+      try {
+        await addToCart(product.id, 1);
+        await refreshCartCount();
+      } catch (error) {
+        console.error('Optimistic add to cart failed:', error);
+        refreshCartCount();
+        showToast('Failed to add item to cart', 'error');
+      } finally {
+        delete cartTimers.current[product.id];
+      }
+    }, 500);
   };
 
   const updateQtyOptimistic = async (productId: string, delta: number) => {
@@ -133,16 +156,23 @@ function App() {
     setCartItems(updatedItems);
     setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
 
-    try {
-      // 3. API call in background
-      await handleCartQuantityChange(productId, newQuantity);
-      // 4. Re-sync
-      await refreshCartCount();
-    } catch (error) {
-      console.error('Optimistic update quantity failed:', error);
-      refreshCartCount();
-      showToast('Failed to update quantity', 'error');
+    // Debounce API call
+    if (cartTimers.current[productId]) {
+      clearTimeout(cartTimers.current[productId]);
     }
+
+    cartTimers.current[productId] = setTimeout(async () => {
+      try {
+        await handleCartQuantityChange(productId, newQuantity);
+        await refreshCartCount();
+      } catch (error) {
+        console.error('Optimistic update quantity failed:', error);
+        refreshCartCount();
+        showToast('Failed to update quantity', 'error');
+      } finally {
+        delete cartTimers.current[productId];
+      }
+    }, 500);
   };
 
   useEffect(() => {
@@ -152,10 +182,25 @@ function App() {
         if (!token) {
           setCurrentScreen('LOGIN');
         } else {
-          const userData = await getUserData();
-          setUserRole(userData?.role || 'USER');
-          setCurrentScreen('HOME');
-          refreshCartCount();
+          // Perform a live check against the server
+          const data = await getMe();
+          if (data) {
+            setUserData(data);
+            setUserRole(data?.role || 'USER');
+            
+            // Sync current state from URL if it's not home
+            const initialPath = window.location.pathname.slice(1).toUpperCase().replace(/-/g, '_');
+            if (initialPath && initialPath !== '' && initialPath !== 'LOGIN') {
+              setCurrentScreen(initialPath as Screen);
+            } else {
+              setCurrentScreen('HOME');
+            }
+            
+            refreshCartCount();
+          } else {
+            // Token is invalid or expired
+            setCurrentScreen('LOGIN');
+          }
         }
       } catch (error) {
         setCurrentScreen('LOGIN');
@@ -182,7 +227,6 @@ function App() {
       if (data) setCategoryData(data);
       
       if (screen === 'HOME') {
-        getUserData().then(data => setUserRole(data?.role || 'USER'));
         refreshCartCount();
       } else if (screen === 'CART') {
         refreshCartCount();
@@ -217,7 +261,11 @@ function App() {
       setCurrentScreen(initialPath as Screen);
     }
 
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // Clear all pending cart timers
+      Object.values(cartTimers.current).forEach(timer => clearTimeout(timer));
+    };
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -238,23 +286,25 @@ function App() {
   return (
     <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar, isLoading, setIsLoading }}>
       <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart, addToCartOptimistic, updateQtyOptimistic }}>
-        <Sidebar />
-        <div className="app-wrapper">
-          <AppContent fadeAnim={fadeAnim} />
-        </div>
-        
-        {isLoading && (
-          <div className="global-loader-overlay">
-            <div className="premium-spinner"></div>
+        <UserContext.Provider value={{ userData, refreshUserData, updateUserDataLocal }}>
+          <Sidebar />
+          <div className="app-wrapper">
+            <AppContent fadeAnim={fadeAnim} />
           </div>
-        )}
-        
-        <ToastNotification
-          message={toast.message}
-          type={toast.type}
-          visible={toast.visible}
-          onHide={() => setToast({ ...toast, visible: false })}
-        />
+          
+          {isLoading && (
+            <div className="global-loader-overlay">
+              <div className="premium-spinner"></div>
+            </div>
+          )}
+          
+          <ToastNotification
+            message={toast.message}
+            type={toast.type}
+            visible={toast.visible}
+            onHide={() => setToast({ ...toast, visible: false })}
+          />
+        </UserContext.Provider>
       </CartContext.Provider>
     </NavigationContext.Provider>
   );

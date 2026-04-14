@@ -8,11 +8,12 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useUser } from '../context/AppContext';
 import { getUserData, UserData, updateProfile, Address } from '../services/authentication.service';
 
 const EditProfileScreen = () => {
   const { navigate, showToast, categoryData } = useAppNavigation();
+  const { refreshUserData } = useUser();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -53,7 +54,8 @@ const EditProfileScreen = () => {
         addresses: addresses,
       };
       
-      await updateProfile(updatedData);
+      const result = await updateProfile(updatedData);
+      await refreshUserData(result);
       showToast('Profile updated successfully', 'success');
       setTimeout(() => navigate(categoryData?.from || 'PROFILE'), 1000);
     } catch (error: any) {

@@ -32,7 +32,6 @@ const CategoryProducts = () => {
       try {
         // If categories were passed through navigation, use them instead of re-fetching
         if (categoryData?.allCategories && Array.isArray(categoryData.allCategories) && categoryData.allCategories.length > 0) {
-          console.log('[CategoryProducts] Using passed categories data');
           let passedCats = categoryData.allCategories;
           // Ensure "All" category is present
           if (!passedCats.find((c: any) => c.id === 'all' || c.category === 'all')) {

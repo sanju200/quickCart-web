@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
-import { logoutUser, getUserData, UserData } from '../services/authentication.service';
+import { useAppNavigation, useUser } from '../context/AppContext';
+import { logoutUser, UserData } from '../services/authentication.service';
 import '../styles/common.css';
 import '../styles/components.css';
 import '../styles/forms.css';
@@ -24,19 +24,12 @@ const PROFILE_OPTIONS = [
 
 const ProfileScreen = () => {
   const { navigate } = useAppNavigation();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      const data = await getUserData();
-      setUser(data);
-      setLoading(false);
-    };
-    loadUserData();
-  }, []);
+  const { userData } = useUser();
+  const loading = !userData;
 
   const getInitial = (name: string) => name.charAt(0).toUpperCase();
+
+  const user = userData;
 
   return (
     <div className="container">
@@ -65,8 +58,11 @@ const ProfileScreen = () => {
                 <span className="user-email">{user?.email || 'No email registered'}</span>
                 {user?.phone && <span className="user-phone">{user.phone}</span>}
                 {user?.addresses?.find(a => a.isSelected) && (
-                  <span className="user-address">
-                    📍 {user.addresses.find(a => a.isSelected)?.streetAddress}
+                  <span className="user-address" style={{ display: 'block', marginTop: 4, lineHeight: '1.4' }}>
+                    📍 {(() => {
+                      const a = user.addresses!.find(addr => addr.isSelected)!;
+                      return `${a.streetAddress}, ${a.city}, ${a.state} ${a.postalCode}, ${a.country}`;
+                    })()}
                   </span>
                 )}
               </div>
