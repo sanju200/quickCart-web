@@ -58,6 +58,8 @@ function App() {
   const [categoryData, setCategoryData] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userData, setUserData] = useState<any | null>(null);
+  const cartTimers = useRef<{[key: string]: any}>({});
+  const lastRefreshedAt = useRef<number>(0);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState(0);
@@ -83,24 +85,17 @@ function App() {
     }
   };
 
-  const refreshUserData = async () => {
-    try {
-      const data = await getMe();
-      if (data) {
-        setUserData(data);
-        if (data.role) setUserRole(data.role);
-      } else {
-        // If data is null, the user is likely unauthorized (session cleared by getMe)
-        setUserData(null);
-        setUserRole(null);
-        
-        // If we were on a protected screen, redirect to login
-        if (!['LOGIN', 'SIGNUP', 'HOME'].includes(currentScreen)) {
-           setCurrentScreen('LOGIN');
-        }
-      }
-    } catch (error) {
-      console.error('Failed to refresh user data:', error);
+  const refreshUserData = async (manualData?: any) => {
+    if (manualData) {
+      setUserData(manualData);
+      if (manualData.role) setUserRole(manualData.role);
+    }
+  };
+
+  const updateUserDataLocal = (data: any) => {
+    if (data) {
+      setUserData(data);
+      if (data.role) setUserRole(data.role);
     }
   };
 
@@ -122,17 +117,23 @@ function App() {
     setCartItems(updatedItems);
     setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
 
-    try {
-      // 2. Perform background API call
-      await addToCart(product.id, 1);
-      // 3. Re-sync with server to get real IDs and calculated totals
-      await refreshCartCount();
-    } catch (error) {
-      // 4. Rollback on failure
-      console.error('Optimistic add to cart failed:', error);
-      refreshCartCount(); // Re-sync to original state
-      showToast('Failed to add item to cart', 'error');
+    // Debounce API call
+    if (cartTimers.current[product.id]) {
+      clearTimeout(cartTimers.current[product.id]);
     }
+
+    cartTimers.current[product.id] = setTimeout(async () => {
+      try {
+        await addToCart(product.id, 1);
+        await refreshCartCount();
+      } catch (error) {
+        console.error('Optimistic add to cart failed:', error);
+        refreshCartCount();
+        showToast('Failed to add item to cart', 'error');
+      } finally {
+        delete cartTimers.current[product.id];
+      }
+    }, 500);
   };
 
   const updateQtyOptimistic = async (productId: string, delta: number) => {
@@ -155,16 +156,23 @@ function App() {
     setCartItems(updatedItems);
     setCartCount(new Set(updatedItems.map(i => i.productId || i.product?.id)).size);
 
-    try {
-      // 3. API call in background
-      await handleCartQuantityChange(productId, newQuantity);
-      // 4. Re-sync
-      await refreshCartCount();
-    } catch (error) {
-      console.error('Optimistic update quantity failed:', error);
-      refreshCartCount();
-      showToast('Failed to update quantity', 'error');
+    // Debounce API call
+    if (cartTimers.current[productId]) {
+      clearTimeout(cartTimers.current[productId]);
     }
+
+    cartTimers.current[productId] = setTimeout(async () => {
+      try {
+        await handleCartQuantityChange(productId, newQuantity);
+        await refreshCartCount();
+      } catch (error) {
+        console.error('Optimistic update quantity failed:', error);
+        refreshCartCount();
+        showToast('Failed to update quantity', 'error');
+      } finally {
+        delete cartTimers.current[productId];
+      }
+    }, 500);
   };
 
   useEffect(() => {
@@ -219,13 +227,9 @@ function App() {
       if (data) setCategoryData(data);
       
       if (screen === 'HOME') {
-        refreshUserData();
         refreshCartCount();
       } else if (screen === 'CART') {
         refreshCartCount();
-      } else {
-        // Refresh user data on every navigation to confirm auth status
-        refreshUserData();
       }
 
       Animated.timing(fadeAnim, {
@@ -257,7 +261,11 @@ function App() {
       setCurrentScreen(initialPath as Screen);
     }
 
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // Clear all pending cart timers
+      Object.values(cartTimers.current).forEach(timer => clearTimeout(timer));
+    };
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -278,7 +286,7 @@ function App() {
   return (
     <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar, isLoading, setIsLoading }}>
       <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart, addToCartOptimistic, updateQtyOptimistic }}>
-        <UserContext.Provider value={{ userData, refreshUserData }}>
+        <UserContext.Provider value={{ userData, refreshUserData, updateUserDataLocal }}>
           <Sidebar />
           <div className="app-wrapper">
             <AppContent fadeAnim={fadeAnim} />

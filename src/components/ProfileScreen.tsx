@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
-import { logoutUser, getUserData, UserData } from '../services/authentication.service';
+import { useAppNavigation, useUser } from '../context/AppContext';
+import { logoutUser, UserData } from '../services/authentication.service';
 import '../styles/common.css';
 import '../styles/components.css';
 import '../styles/forms.css';
@@ -24,19 +24,12 @@ const PROFILE_OPTIONS = [
 
 const ProfileScreen = () => {
   const { navigate } = useAppNavigation();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      const data = await getUserData();
-      setUser(data);
-      setLoading(false);
-    };
-    loadUserData();
-  }, []);
+  const { userData } = useUser();
+  const loading = !userData;
 
   const getInitial = (name: string) => name.charAt(0).toUpperCase();
+
+  const user = userData;
 
   return (
     <div className="container">
