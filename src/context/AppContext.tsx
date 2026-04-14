@@ -29,7 +29,8 @@ export const CartContext = createContext<CartContextType | undefined>(undefined)
 
 interface UserContextType {
   userData: any | null;
-  refreshUserData: () => Promise<void>;
+  refreshUserData: (manualData?: any) => Promise<void>;
+  updateUserDataLocal: (data: any) => void;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
