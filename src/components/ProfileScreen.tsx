@@ -65,8 +65,11 @@ const ProfileScreen = () => {
                 <span className="user-email">{user?.email || 'No email registered'}</span>
                 {user?.phone && <span className="user-phone">{user.phone}</span>}
                 {user?.addresses?.find(a => a.isSelected) && (
-                  <span className="user-address">
-                    📍 {user.addresses.find(a => a.isSelected)?.streetAddress}
+                  <span className="user-address" style={{ display: 'block', marginTop: 4, lineHeight: '1.4' }}>
+                    📍 {(() => {
+                      const a = user.addresses!.find(addr => addr.isSelected)!;
+                      return `${a.streetAddress}, ${a.city}, ${a.state} ${a.postalCode}, ${a.country}`;
+                    })()}
                   </span>
                 )}
               </div>

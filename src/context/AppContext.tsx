@@ -27,6 +27,13 @@ interface CartContextType {
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
+interface UserContextType {
+  userData: any | null;
+  refreshUserData: () => Promise<void>;
+}
+
+export const UserContext = createContext<UserContextType | undefined>(undefined);
+
 export const useCartCount = () => {
   const context = useContext(CartContext);
   if (!context) throw new Error('useCartCount must be used within CartProvider');
@@ -36,5 +43,11 @@ export const useCartCount = () => {
 export const useAppNavigation = () => {
   const context = useContext(NavigationContext);
   if (!context) throw new Error('useAppNavigation must be used within NavigationProvider');
+  return context;
+};
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) throw new Error('useUser must be used within UserProvider');
   return context;
 };

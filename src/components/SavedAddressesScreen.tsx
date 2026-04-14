@@ -9,11 +9,12 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useUser } from '../context/AppContext';
 import { getUserData, updateProfile, Address, UserData } from '../services/authentication.service';
 
 const SavedAddressesScreen = () => {
   const { navigate, showToast, categoryData } = useAppNavigation();
+  const { refreshUserData } = useUser();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,6 +56,7 @@ const SavedAddressesScreen = () => {
       const updatedUser = { ...user, addresses: updatedAddresses };
       await updateProfile(updatedUser);
       setUser(updatedUser);
+      await refreshUserData();
       showToast('Default address updated', 'success');
     } catch (error) {
       showToast('Failed to update address', 'error');
@@ -78,6 +80,7 @@ const SavedAddressesScreen = () => {
       const updatedUser = { ...user, addresses: updatedAddresses };
       await updateProfile(updatedUser);
       setUser(updatedUser);
+      await refreshUserData();
       showToast('Address removed', 'success');
     } catch (error) {
       showToast('Failed to remove address', 'error');
@@ -116,6 +119,7 @@ const SavedAddressesScreen = () => {
       
       await updateProfile(updatedUser);
       setUser(updatedUser);
+      await refreshUserData();
       setShowAddModal(false);
       resetForm();
       showToast(editingIndex !== null ? 'Address updated' : 'New address added', 'success');
@@ -177,6 +181,7 @@ const SavedAddressesScreen = () => {
       const updatedUser = { ...user, addresses: sampleAddresses };
       await updateProfile(updatedUser);
       setUser(updatedUser);
+      await refreshUserData();
       showToast('Sample addresses loaded', 'success');
     } catch (error) {
       showToast('Failed to load samples', 'error');
@@ -209,9 +214,9 @@ const SavedAddressesScreen = () => {
         </div>
       </div>
 
-      <div className="scroll-content" style={{ overflowY: 'visible', height: 'auto', flex: 1, backgroundColor: '#F9FBF9' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', padding: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 32 }}>
+      <div className="scroll-content" style={{ paddingBottom: '20px', flex: 1, backgroundColor: '#F9FBF9' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', padding: '16px 24px 0 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 20 }}>
             {user?.addresses && user.addresses.length > 0 ? (
               user.addresses.map((item, index) => (
                 <div 
@@ -281,7 +286,7 @@ const SavedAddressesScreen = () => {
                 </div>
               ))
             ) : (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
                 <span style={{ fontSize: 64, display: 'block', marginBottom: 20 }}>📍</span>
                 <h2 style={{ fontSize: 20, color: '#333', fontWeight: 800 }}>No saved addresses</h2>
                 <p style={{ color: '#999', marginTop: 8 }}>Add an address to make checkout faster.</p>

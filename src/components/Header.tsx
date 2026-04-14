@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/header.css';
-import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { getUserData, UserData } from '../services/authentication.service';
+import { useAppNavigation, useCartCount, useUser } from '../context/AppContext';
+import { UserData } from '../services/authentication.service';
 
 const Header = () => {
   const { navigate, currentScreen, userRole, toggleSidebar } = useAppNavigation();
   const { cartCount } = useCartCount();
-  const [user, setUser] = useState<UserData | null>(null);
+  const { userData: user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const data = await getUserData();
-      setUser(data);
-    };
-    loadUser();
-  }, [currentScreen]);
 
   const handleSearch = () => {
     if (userRole === 'USER' && searchQuery.trim()) {
@@ -24,7 +16,22 @@ const Header = () => {
     }
   };
 
-  const getInitial = (name: string) => name.charAt(0).toUpperCase();
+  const formatAddress = (address: any) => {
+    if (!address) return 'Set Location';
+    const full = `${address.streetAddress}, ${address.city}`;
+    const words = full.split(' ');
+    if (words.length > 6) {
+      return words.slice(0, 6).join(' ') + '...';
+    }
+    return full;
+  };
+
+  const getInitial = (user: any) => {
+    if (user?.name) return user.name.charAt(0).toUpperCase();
+    if (user?.firstName) return user.firstName.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
+    return '?';
+  };
 
   return (
     <header className="header-outer-container">
@@ -84,8 +91,8 @@ const Header = () => {
                 <div className="location-info">
                   <span className="location-label">Delivery to</span>
                   <div className="address-wrapper">
-                    <span className="address-text">
-                      {user?.addresses?.find((a: any) => a.isSelected)?.streetAddress.split(',')[0] || 'Set Location'}
+                    <span className="address-text" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                      {formatAddress(user?.addresses?.find((a: any) => a.isSelected))}
                     </span>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -98,7 +105,7 @@ const Header = () => {
             <button onClick={() => navigate('PROFILE')} className="profile-button" aria-label="Profile">
               <div className="profile-avatar-fallback">
                 <span className="profile-avatar-text">
-                  {user?.name ? getInitial(user.name) : '?'}
+                  {getInitial(user)}
                 </span>
               </div>
             </button>

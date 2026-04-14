@@ -48,15 +48,16 @@ import UserManagerScreen from './components/UserManagerScreen';
 import SalesManagerScreen from './components/SalesManagerScreen';
 import NotFoundScreen from './components/NotFoundScreen';
 import ToastNotification from './components/ToastNotification';
-import { getAuthToken, getUserData } from './services/authentication.service';
+import { getAuthToken, getUserData, getMe } from './services/authentication.service';
 
-import { Screen, NavigationContext, CartContext } from './context/AppContext';
+import { Screen, NavigationContext, CartContext, UserContext } from './context/AppContext';
 import { getCart, addToCart, handleCartQuantityChange } from './services/cart.service';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('HOME');
   const [categoryData, setCategoryData] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState(0);
@@ -79,6 +80,27 @@ function App() {
       setCartCount(uniqueItems.size);
     } catch (error) {
       console.error('Failed to refresh cart count:', error);
+    }
+  };
+
+  const refreshUserData = async () => {
+    try {
+      const data = await getMe();
+      if (data) {
+        setUserData(data);
+        if (data.role) setUserRole(data.role);
+      } else {
+        // If data is null, the user is likely unauthorized (session cleared by getMe)
+        setUserData(null);
+        setUserRole(null);
+        
+        // If we were on a protected screen, redirect to login
+        if (!['LOGIN', 'SIGNUP', 'HOME'].includes(currentScreen)) {
+           setCurrentScreen('LOGIN');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
     }
   };
 
@@ -152,10 +174,25 @@ function App() {
         if (!token) {
           setCurrentScreen('LOGIN');
         } else {
-          const userData = await getUserData();
-          setUserRole(userData?.role || 'USER');
-          setCurrentScreen('HOME');
-          refreshCartCount();
+          // Perform a live check against the server
+          const data = await getMe();
+          if (data) {
+            setUserData(data);
+            setUserRole(data?.role || 'USER');
+            
+            // Sync current state from URL if it's not home
+            const initialPath = window.location.pathname.slice(1).toUpperCase().replace(/-/g, '_');
+            if (initialPath && initialPath !== '' && initialPath !== 'LOGIN') {
+              setCurrentScreen(initialPath as Screen);
+            } else {
+              setCurrentScreen('HOME');
+            }
+            
+            refreshCartCount();
+          } else {
+            // Token is invalid or expired
+            setCurrentScreen('LOGIN');
+          }
         }
       } catch (error) {
         setCurrentScreen('LOGIN');
@@ -182,10 +219,13 @@ function App() {
       if (data) setCategoryData(data);
       
       if (screen === 'HOME') {
-        getUserData().then(data => setUserRole(data?.role || 'USER'));
+        refreshUserData();
         refreshCartCount();
       } else if (screen === 'CART') {
         refreshCartCount();
+      } else {
+        // Refresh user data on every navigation to confirm auth status
+        refreshUserData();
       }
 
       Animated.timing(fadeAnim, {
@@ -238,23 +278,25 @@ function App() {
   return (
     <NavigationContext.Provider value={{ currentScreen, categoryData, userRole, navigate, showToast, isSidebarOpen, toggleSidebar, isLoading, setIsLoading }}>
       <CartContext.Provider value={{ cartItems, cartCount, refreshCartCount, resetCart, addToCartOptimistic, updateQtyOptimistic }}>
-        <Sidebar />
-        <div className="app-wrapper">
-          <AppContent fadeAnim={fadeAnim} />
-        </div>
-        
-        {isLoading && (
-          <div className="global-loader-overlay">
-            <div className="premium-spinner"></div>
+        <UserContext.Provider value={{ userData, refreshUserData }}>
+          <Sidebar />
+          <div className="app-wrapper">
+            <AppContent fadeAnim={fadeAnim} />
           </div>
-        )}
-        
-        <ToastNotification
-          message={toast.message}
-          type={toast.type}
-          visible={toast.visible}
-          onHide={() => setToast({ ...toast, visible: false })}
-        />
+          
+          {isLoading && (
+            <div className="global-loader-overlay">
+              <div className="premium-spinner"></div>
+            </div>
+          )}
+          
+          <ToastNotification
+            message={toast.message}
+            type={toast.type}
+            visible={toast.visible}
+            onHide={() => setToast({ ...toast, visible: false })}
+          />
+        </UserContext.Provider>
       </CartContext.Provider>
     </NavigationContext.Provider>
   );
