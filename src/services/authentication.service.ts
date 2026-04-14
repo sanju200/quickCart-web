@@ -65,7 +65,7 @@ export const loginUser = async (email: string, password: string) => {
         };
 
         await saveUserData(userData);
-        return data;
+        return userData;
     } catch (error: any) {
         throw new Error(error.message || 'An error occurred during login');
     }

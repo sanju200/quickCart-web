@@ -54,8 +54,8 @@ const EditProfileScreen = () => {
         addresses: addresses,
       };
       
-      await updateProfile(updatedData);
-      await refreshUserData();
+      const result = await updateProfile(updatedData);
+      await refreshUserData(result);
       showToast('Profile updated successfully', 'success');
       setTimeout(() => navigate(categoryData?.from || 'PROFILE'), 1000);
     } catch (error: any) {
