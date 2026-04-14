@@ -27,9 +27,9 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      await loginUser(email, password);
+      const userData = await loginUser(email, password);
       // Immediately refresh user data to update the app state
-      await refreshUserData();
+      await refreshUserData(userData);
       showToast('Login successful! Redirecting...', 'success');
       setTimeout(() => navigate('HOME'), 1200);
     } catch (err: any) {
