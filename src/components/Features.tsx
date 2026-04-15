@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/Features.css';
 
 const FEATURES = [
   {
@@ -33,75 +34,24 @@ const FEATURES = [
 
 const Features = () => {
   return (
-    <div style={styles.container}>
-      <div style={styles.grid}>
-        {FEATURES.map((item) => (
-          <div key={item.id} style={styles.card}>
-            <div style={{ ...styles.iconContainer, backgroundColor: item.bgColor }}>
-              <span style={styles.icon}>{item.icon}</span>
+    <div className="features-container">
+      <div className="features-scroll-wrapper">
+        <div className="features-grid">
+          {[...FEATURES, ...FEATURES].map((item, index) => (
+            <div key={`${item.id}-${index}`} className="feature-card">
+              <div className="feature-icon-container" style={{ backgroundColor: item.bgColor }}>
+                <span className="feature-icon">{item.icon}</span>
+              </div>
+              <div className="feature-text-container">
+                <span className="feature-title">{item.title}</span>
+                <span className="feature-subtitle">{item.subtitle}</span>
+              </div>
             </div>
-            <div style={styles.textContainer}>
-              <span style={styles.title}>{item.title}</span>
-              <span style={styles.subtitle}>{item.subtitle}</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '12px 20px 16px',
-    backgroundColor: '#F1F8E9',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 12,
-  },
-  card: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: '14px 16px',
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    border: '1px solid #E0E0E0',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-    gap: 12,
-    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-    cursor: 'default',
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  icon: {
-    fontSize: 22,
-  },
-  textContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: 0,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#1a1a1a',
-    whiteSpace: 'nowrap' as const,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#777',
-    marginTop: 2,
-  },
 };
 
 export default Features;
