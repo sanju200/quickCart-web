@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
   ActivityIndicator,
 } from 'react-native';
+import '../styles/CartScreen.css';
 import { useAppNavigation, useCartCount } from '../context/AppContext';
-// Keep existing imports if any or remove the line if empty
 import { getUserData, UserData } from '../services/authentication.service';
 
 const CartScreen = () => {
@@ -42,430 +36,160 @@ const CartScreen = () => {
   const subtotal = calculateSubtotal();
   const total = items.length > 0 ? subtotal + deliveryFee + handlingFee : 0;
 
+  const handleProceed = () => {
+    navigate('PAYMENTS', { items, total });
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigate('CATEGORY_PRODUCTS')} style={styles.backButton}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Review Cart</Text>
-      </View>
-      <View style={styles.scrollContent}>
-        <View style={styles.contentWrapper}>
+    <div className="cart-container">
+      {/* Header */}
+      <header className="cart-header">
+        <button className="cart-back-btn" onClick={() => navigate('HOME')}>←</button>
+        <span className="cart-header-title">Review Cart</span>
+      </header>
+
+      {/* Main Content */}
+      <main className="cart-scroll-view">
+        <div className="cart-content-wrapper">
           {loading ? (
-            <View style={styles.centerContainer}>
+            <div className="center-container" style={{ textAlign: 'center', paddingTop: '100px' }}>
               <ActivityIndicator size="large" color="#2E7D32" />
-            </View>
+            </div>
           ) : error ? (
-            <View style={styles.centerContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity style={styles.retryBtn} onPress={() => refreshCartCount()}>
-                <Text style={styles.retryText}>Retry</Text>
-              </TouchableOpacity>
-            </View>
+            <div className="center-container" style={{ textAlign: 'center', paddingTop: '100px' }}>
+              <p className="error-text">{error}</p>
+              <button className="retry-btn" onClick={() => refreshCartCount()}>Retry</button>
+            </div>
           ) : items.length > 0 ? (
             <>
-              <View style={styles.deliveryBanner}>
-                <Text style={styles.deliveryIcon}>⚡</Text>
-                <Text style={styles.deliveryText}>Delivery in 8 mins to Home</Text>
-              </View>
+              {/* Delivery Banner */}
+              <div className="delivery-banner">
+                <span className="delivery-icon">⚡</span>
+                <span className="delivery-text">Delivery in 8 mins to Home</span>
+              </div>
 
-              <View style={styles.itemsContainer}>
+              {/* Items Card */}
+              <div className="items-card">
                 {items.map((item) => (
-                  <View key={item.id} style={styles.cartItem}>
-                    <Image source={{ uri: item.product?.image || 'https://via.placeholder.com/60' }} style={styles.itemImage} />
-                    <View style={styles.itemInfo}>
-                      <Text style={styles.itemName}>{item.product?.name || 'Unknown Product'}</Text>
-                      <Text style={styles.itemWeight}>{item.product?.weight}</Text>
-                      <Text style={styles.itemPrice}>
+                  <div key={item.id} className="cart-item">
+                    <img 
+                      src={item.product?.image || 'https://via.placeholder.com/60'} 
+                      alt={item.product?.name} 
+                      className="item-image" 
+                    />
+                    <div className="item-details">
+                      <h3 className="item-name">{item.product?.name || 'Unknown Product'}</h3>
+                      <p className="item-weight">{item.product?.weight || '1 unit'}</p>
+                      <div className="item-price-row">
                         ₹{item.product?.price}
                         {item.quantity > 1 && (
-                          <Text style={styles.itemPriceTotal}>
-                            {' '} x {item.quantity} = ₹{(typeof item.product?.price === 'string' 
+                          <span className="item-total-price">
+                            x {item.quantity} = ₹{(typeof item.product?.price === 'string' 
                               ? parseFloat(item.product.price.replace(/[^\d.]/g, '')) 
                               : typeof item.product?.price === 'number' ? item.product.price : 0) * item.quantity}
-                          </Text>
+                          </span>
                         )}
-                      </Text>
-                    </View>
-                    <View style={styles.quantityControl}>
-                      <TouchableOpacity 
-                        style={styles.qtyBtn} 
-                        onPress={() => handleUpdateQuantity(item.productId || item.product?.id || '', item.quantity, -1)}
-                      >
-                        <Text style={styles.qtyBtnText}>−</Text>
-                      </TouchableOpacity>
-                      <Text style={styles.qtyText}>{item.quantity}</Text>
-                      <TouchableOpacity 
-                        style={styles.qtyBtn} 
-                        onPress={() => handleUpdateQuantity(item.productId || item.product?.id || '', item.quantity, 1)}
-                      >
-                        <Text style={styles.qtyBtnText}>+</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
+                      </div>
+                    </div>
+                    
+                    <div className="qty-control">
+                      <button 
+                        className="qty-btn"
+                        onClick={() => handleUpdateQuantity(item.productId || item.product?.id || '', item.quantity, -1)}
+                      >−</button>
+                      <span className="qty-number">{item.quantity}</span>
+                      <button 
+                        className="qty-btn"
+                        onClick={() => handleUpdateQuantity(item.productId || item.product?.id || '', item.quantity, 1)}
+                      >+</button>
+                    </div>
+                  </div>
                 ))}
-              </View>
+              </div>
 
-              <View style={styles.billContainer}>
-                <Text style={styles.billTitle}>Bill Details</Text>
-                <View style={styles.billRow}>
-                  <Text style={styles.billLabel}>Item Total</Text>
-                  <Text style={styles.billValue}>₹{subtotal}</Text>
-                </View>
-                <View style={styles.billRow}>
-                  <Text style={styles.billLabel}>Delivery Fee</Text>
-                  <Text style={styles.billValue}>₹{deliveryFee}</Text>
-                </View>
-                <View style={styles.billRow}>
-                  <Text style={styles.billLabel}>Handling Fee</Text>
-                  <Text style={styles.billValue}>₹{handlingFee}</Text>
-                </View>
-                <View style={[styles.billRow, styles.totalRow]}>
-                  <Text style={styles.totalLabel}>Grand Total</Text>
-                  <Text style={styles.totalValue}>₹{total}</Text>
-                </View>
-              </View>
+              {/* Bill Details Card */}
+              <div className="bill-card">
+                <h2 className="bill-title">Bill Details</h2>
+                <div className="bill-line">
+                  <span>Item Total</span>
+                  <span>₹{subtotal}</span>
+                </div>
+                <div className="bill-line">
+                  <span>Delivery Fee</span>
+                  <span>₹25</span>
+                </div>
+                <div className="bill-line">
+                  <span>Handling Fee</span>
+                  <span>₹5</span>
+                </div>
+                <div className="bill-line total">
+                  <span>Grand Total</span>
+                  <span>₹{total}</span>
+                </div>
 
-              <View style={styles.policyContainer}>
-                <Text style={styles.policyTitle}>Cancellation Policy</Text>
-                <Text style={styles.policyText}>
-                  Orders cannot be cancelled once packed for delivery. In case of unexpected delays, a refund will be provided.
-                </Text>
-              </View>
+                {/* Primary Action Button (Desktop Optimized) */}
+                <button 
+                  className="desktop-pay-btn"
+                  onClick={handleProceed}
+                >
+                  {user?.addresses?.some(addr => addr.isSelected) ? 'Proceed to Pay →' : 'Select Delivery Address'}
+                </button>
+              </div>
+
+              {/* Policy Section */}
+              <div className="policy-section" style={{ padding: '10px 10px' }}>
+                <h4 style={{ color: '#666', marginBottom: '8px', fontSize: '15px' }}>Cancellation Policy</h4>
+                <p style={{ color: '#999', fontSize: '12px', lineHeight: '1.6' }}>
+                  Orders cannot be cancelled once packed for delivery. In case of unexpected delays, a refund will be provided. Friendly tip: Check your address before paying!
+                </p>
+              </div>
             </>
           ) : (
-            <View style={styles.emptyCart}>
-              <Text style={styles.emptyCartIcon}>🛒</Text>
-              <Text style={styles.emptyCartText}>Your cart is empty!</Text>
-              <TouchableOpacity onPress={() => navigate('HOME')} style={styles.shopBtn}>
-                <Text style={styles.shopBtnText}>Start Shopping</Text>
-              </TouchableOpacity>
-            </View>
+            <div className="empty-cart-view" style={{ textAlign: 'center', paddingTop: '100px', width: '100%' }}>
+              <span style={{ fontSize: '100px', opacity: 0.1 }}>🛒</span>
+              <h2 style={{ marginTop: '24px', color: '#555', fontSize: '24px' }}>Your cart is empty!</h2>
+              <button 
+                className="desktop-pay-btn" 
+                style={{ marginTop: '32px', maxWidth: '240px', marginLeft: 'auto', marginRight: 'auto' }}
+                onClick={() => navigate('HOME')}
+              >Start Shopping</button>
+            </div>
           )}
-        </View>
-      </View>
+        </div>
+      </main>
 
+      {/* Floating Checkout Bar (Mobile & small tablets) */}
       {items.length > 0 && (
-        <View style={styles.checkoutBarContainer}>
-          {user?.addresses?.some(addr => addr.isSelected) ? (
-            <View style={styles.checkoutBar}>
-              <TouchableOpacity 
-                style={styles.paymentMethodSection} 
-                onPress={() => navigate('PAYMENTS', { items: items, total: total })}
-              >
-                <View style={styles.paymentInfo}>
-                  <Text style={styles.checkoutTotal}>₹{total}</Text>
-                  <View style={styles.paymentMethodLabel}>
-                    <Text style={styles.paymentMethodText}>Google Pay</Text>
-                    <Text style={styles.paymentDropdownIcon}> ⌄</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.payBtn} onPress={() => navigate('PAYMENTS', { items: items, total: total })}>
-                <Text style={styles.payBtnText}>Proceed to Pay →</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.checkoutBar}>
-              <View style={[styles.paymentMethodSection, { flex: 0.8 }]}>
-                 <Text style={{ fontSize: 13, color: '#d32f2f', fontWeight: 'bold' }}>Delivery address required</Text>
-                 <Text style={{ fontSize: 11, color: '#666', marginTop: 2 }}>Please select an address to continue checkout.</Text>
-              </View>
-              <TouchableOpacity style={[styles.payBtn, { backgroundColor: '#FF9800', paddingHorizontal: 20 }]} onPress={() => navigate('SAVED_ADDRESSES', { from: 'CART' })}>
-                <Text style={styles.payBtnText}>Select Address</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+        <div className="checkout-fixed-bar">
+          <div className="checkout-bar-glass">
+            <div className="pay-info-group">
+              <span className="pay-total-amt">₹{total}</span>
+              <div className="pay-method-tag">
+                <span>Google Pay</span>
+                <span style={{ fontSize: '10px' }}>⌄</span>
+              </div>
+            </div>
+            <button 
+              className="pay-button-action"
+              style={{ 
+                background: 'linear-gradient(135deg, #2E7D32, #1B5E20)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '16px',
+                padding: '14px 28px',
+                fontSize: '15px',
+                fontWeight: '800',
+                cursor: 'pointer'
+              }}
+              onClick={handleProceed}
+            >
+              {user?.addresses?.some(addr => addr.isSelected) ? 'Proceed to Pay →' : 'Set Address'}
+            </button>
+          </div>
+        </div>
       )}
-    </View>
+    </div>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7F5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    padding: 5,
-    marginRight: 10,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#000',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  scrollContent: {
-    paddingBottom: 140,
-    alignItems: 'center',
-  },
-  contentWrapper: {
-    width: '100%',
-    maxWidth: '60%',
-    alignSelf: 'center',
-  },
-  deliveryBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2E7D32',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  deliveryIcon: {
-    fontSize: 14,
-    marginRight: 8,
-  },
-  deliveryText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  itemsContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginTop: 10,
-  },
-  cartItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  itemInfo: {
-    flex: 1,
-    marginLeft: 15,
-  },
-  itemName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  itemWeight: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-    marginTop: 4,
-  },
-  itemPriceTotal: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '400',
-  },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2E7D32',
-    borderRadius: 8,
-    padding: 4,
-  },
-  qtyBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  qtyBtnText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  qtyText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginHorizontal: 10,
-  },
-  billContainer: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 15,
-  },
-  billTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 15,
-  },
-  billRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  billLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  billValue: {
-    fontSize: 14,
-    color: '#333',
-  },
-  totalRow: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  totalValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  policyContainer: {
-    padding: 15,
-    marginTop: 10,
-  },
-  policyTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 5,
-  },
-  policyText: {
-    fontSize: 12,
-    color: '#999',
-    lineHeight: 18,
-  },
-  emptyCart: {
-    alignItems: 'center',
-    paddingTop: 100,
-  },
-  emptyCartIcon: {
-    fontSize: 80,
-    marginBottom: 20,
-    opacity: 0.3,
-  },
-  emptyCartText: {
-    fontSize: 18,
-    color: '#666',
-    fontWeight: '600',
-  },
-  shopBtn: {
-    marginTop: 20,
-    backgroundColor: '#2E7D32',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  shopBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  checkoutBarContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-  },
-  checkoutBar: {
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    maxWidth: '60%',
-    borderRadius: 24,
-    elevation: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  paymentMethodSection: {
-    flex: 1,
-  },
-  paymentInfo: {
-    justifyContent: 'center',
-  },
-  checkoutTotal: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#1a1a1a',
-  },
-  paymentMethodLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
-  },
-  paymentMethodText: {
-    fontSize: 13,
-    color: '#2E7D32',
-    fontWeight: '800',
-  },
-  paymentDropdownIcon: {
-    fontSize: 11,
-    color: '#2E7D32',
-    opacity: 0.7,
-  },
-  payBtn: {
-    backgroundColor: '#2E7D32',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 16,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-  },
-  payBtnText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 16,
-  },
-  centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingTop: 100,
-  },
-  errorText: {
-      color: '#d32f2f',
-      marginBottom: 10,
-  },
-  retryBtn: {
-      backgroundColor: '#2E7D32',
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 8,
-  },
-  retryText: {
-      color: '#fff',
-      fontWeight: 'bold',
-  }
-});
 
 export default CartScreen;
