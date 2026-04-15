@@ -393,3 +393,28 @@
   color: #2E7D32;
   font-weight: 800;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 640px) {
+  .user-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 24px 16px;
+    text-align: center;
+  }
+  .user-info {
+    margin-left: 0 !important;
+    margin-top: 16px;
+    align-items: center !important;
+  }
+  .edit-btn {
+    margin-top: 20px;
+    width: 100%;
+    justify-content: center !important;
+  }
+  .user-address {
+    text-align: center;
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+}
