@@ -79,7 +79,10 @@ export const getFilteredProducts = async (category?: string, search?: string, ta
                 throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
             }
             const data = await response.json();
-            return Array.isArray(data) ? data : [];
+            // Handle both paginated { data: [], total } and plain array responses
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.data)) return data.data;
+            return [];
         } catch (error: any) {
             console.error('Error fetching filtered products:', error);
             delete productsPromise[cacheKey];
@@ -119,7 +122,10 @@ export const getAllProducts = async (): Promise<Product[]> => {
                 throw new Error(errorData.message || `Failed to fetch products (Status: ${response.status})`);
             }
             const data = await response.json();
-            return Array.isArray(data) ? data : [];
+            // Handle both paginated { data: [], total } and plain array responses
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.data)) return data.data;
+            return [];
         } catch (error: any) {
             console.error('Error fetching products:', error);
             delete productsPromise[cacheKey];
