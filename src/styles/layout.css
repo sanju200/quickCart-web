@@ -10,8 +10,19 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  /* min-height set here only for non-fullscreen screens.
+     For CATEGORY_PRODUCTS the inline style overrides with height:100dvh */
   min-height: 100vh;
   background-color: #fff;
+}
+
+/* When the page is in "fullscreen" mode (e.g. CategoryProducts),
+   we need the page-container to NOT extend beyond the viewport */
+.page-container.cp-fullscreen {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .scroll-container {
@@ -63,9 +74,9 @@
   }
 }
 
-.center-container {
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+/* Global mobile base reset */
+@media (max-width: 640px) {
+  .page-container {
+    min-height: 100dvh;
+  }
 }

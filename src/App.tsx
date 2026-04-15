@@ -316,15 +316,29 @@ function AppContent({ fadeAnim }: { fadeAnim: Animated.Value }) {
   const showHeader = !['LOGIN', 'SIGNUP', 'NOT_FOUND'].includes(currentScreen);
 
   return (
-    <div className="page-container" style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh', 
-      height: currentScreen === 'CATEGORY_PRODUCTS' ? '100vh' : 'auto', 
-      overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible' 
-    }}>
+    <div
+      className="page-container"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        /* On CATEGORY_PRODUCTS: lock to viewport so our flex scroll chain works */
+        height: currentScreen === 'CATEGORY_PRODUCTS' ? '100dvh' : 'auto',
+        minHeight: currentScreen === 'CATEGORY_PRODUCTS' ? 0 : '100vh',
+        overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible',
+      }}
+    >
       {showHeader && <Header />}
-      <Animated.View style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0, opacity: fadeAnim }}>
+      <Animated.View
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          minHeight: 0,   /* allows flex children to scroll within this container */
+          overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible',
+          opacity: fadeAnim,
+        }}
+      >
         <AppScreen currentScreen={currentScreen} />
       </Animated.View>
     </div>
@@ -422,14 +436,17 @@ function AppScreen({ currentScreen }: { currentScreen: Screen }) {
   };
 
   return (
-    <div style={{ 
-      flex: 1, 
-      width: '100%', 
-      height: currentScreen === 'CATEGORY_PRODUCTS' ? '100%' : 'auto', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible' 
-    }}>
+    <div
+      style={{
+        flex: 1,
+        width: '100%',
+        minHeight: 0,
+        height: currentScreen === 'CATEGORY_PRODUCTS' ? '100%' : 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: currentScreen === 'CATEGORY_PRODUCTS' ? 'hidden' : 'visible',
+      }}
+    >
       {renderScreen()}
     </div>
   );

@@ -75,7 +75,9 @@ export const getOrders = async (): Promise<Order[]> => {
                 throw new Error(errorData.message || `Failed to fetch orders (Status: ${response.status})`);
             }
 
-            const orders = await response.json();
+            const responseData = await response.json();
+            // Handle both paginated { data: [], total } and plain array responses
+            const orders = Array.isArray(responseData) ? responseData : (responseData?.data && Array.isArray(responseData.data) ? responseData.data : []);
 
             return orders.map((o: any) => ({
                 ...o,
@@ -130,7 +132,9 @@ export const getAllOrders = async (params?: { status?: string; assignedDeliveryP
                 throw new Error(`Failed to fetch all orders (Status: ${response.status})`);
             }
 
-            const orders = await response.json();
+            const responseData = await response.json();
+            // Handle both paginated { data: [], total } and plain array responses
+            const orders = Array.isArray(responseData) ? responseData : (responseData?.data && Array.isArray(responseData.data) ? responseData.data : []);
             return orders.map((o: any) => ({
                 ...o,
                 createdAt: o.createdAt || o.created_at

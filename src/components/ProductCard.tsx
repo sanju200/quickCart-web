@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import { Product, getCategoryName } from '../services/product.service';
 import '../styles/common.css';
 import '../styles/components.css';
@@ -12,9 +11,21 @@ interface ProductCardProps {
   numColumns: number;
 }
 
+/** Returns a display-friendly weight string. Falls back to "1 Unit" if missing. */
+const formatWeight = (weight?: string): string => {
+  if (!weight || weight.trim() === '' || weight === 'undefined' || weight === 'null') {
+    return '1 Unit';
+  }
+  return weight;
+};
+
 const ProductCard: React.FC<ProductCardProps> = ({ item, quantity, onAdd, onUpdateQuantity, numColumns }) => {
   return (
     <div className="product-card">
+      {/* Category badge — top-left corner of card */}
+      <span className="float-category">{getCategoryName(item)}</span>
+
+      {/* Product image */}
       <div className="product-image-container">
         <img 
           src={item.image || 'https://via.placeholder.com/150'} 
@@ -22,12 +33,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, quantity, onAdd, onUpda
           alt={item.name}
           loading="lazy"
         />
-        <span className="float-category">{getCategoryName(item)}</span>
       </div>
       
+      {/* Product info */}
       <div className="product-info">
         <h3 className="product-name">{item.name}</h3>
-        <span className="product-weight">{item.weight}</span>
+        <span className="product-weight">{formatWeight(item.weight)}</span>
         
         <div className="price-row">
           <span className="product-price">₹{item.price}</span>

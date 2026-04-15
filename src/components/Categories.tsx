@@ -209,7 +209,8 @@ const Categories = () => {
                 />
               </div>
             ))}
-            {recentlyOrdered.length >= 10 && (
+            {/* View More card — always visible */}
+            <div style={{ flexShrink: 0 }} className="scroll-card-wrapper">
               <button
                 style={styles.viewAllCard}
                 onClick={() => navigate('PREVIOUSLY_ORDERED')}
@@ -217,9 +218,10 @@ const Categories = () => {
                 <div style={styles.viewAllIconContainer}>
                   <span style={styles.viewAllIcon}>→</span>
                 </div>
-                <span style={styles.viewAllText}>View All Items</span>
+                <span style={styles.viewAllText}>View More</span>
+                <span style={styles.viewAllSubText}>See all ordered items</span>
               </button>
-            )}
+            </div>
           </div>
         ) : (
           <div style={styles.emptyRecentContainer}>
@@ -391,11 +393,10 @@ const styles: Record<string, React.CSSProperties> = {
   productScroll: {
     display: 'flex',
     flexDirection: 'row',
-    gap: 20,
-    padding: '0 24px',
+    gap: 16,
+    padding: '8px 24px 24px',
     overflowX: 'auto' as any,
-    overflowY: 'hidden' as any,
-    paddingBottom: 24,
+    overflowY: 'visible' as any,
     msOverflowStyle: 'none',
     scrollbarWidth: 'none',
   },
@@ -459,41 +460,51 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.5,
   },
   viewAllCard: {
-    minWidth: 160,
+    width: 220,
+    height: '100%',
+    minHeight: 280,
     backgroundColor: '#fff',
-    borderRadius: 24,
-    border: '2px solid #E8F5E9',
+    borderRadius: 16,
+    border: '1.5px solid #E8F5E9',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: '32px 24px',
     cursor: 'pointer',
     flexShrink: 0,
-    gap: 16,
-    transition: 'all 0.2s ease',
+    gap: 14,
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
   },
   viewAllIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     background: 'linear-gradient(135deg, #2E7D32, #43A047)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 6px 16px rgba(46,125,50,0.2)',
+    boxShadow: '0 6px 20px rgba(46,125,50,0.25)',
+    transition: 'transform 0.3s ease',
   },
   viewAllIcon: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 700,
   },
   viewAllText: {
-    color: '#2E7D32',
-    fontSize: 15,
+    color: '#1a1a1a',
+    fontSize: 16,
     fontWeight: 800,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     lineHeight: 1.3,
+  },
+  viewAllSubText: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: 500,
+    textAlign: 'center' as const,
   },
 };
 

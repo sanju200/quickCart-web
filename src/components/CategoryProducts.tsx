@@ -11,6 +11,7 @@ import ProductCard from './ProductCard';
 import '../styles/common.css';
 import '../styles/forms.css';
 import '../styles/sidebar.css';
+import '../styles/category-products.css';
 
 const CategoryProducts = () => {
   const { categoryData, navigate } = useAppNavigation();
@@ -25,25 +26,23 @@ const CategoryProducts = () => {
   const [localSearch, setLocalSearch ] = useState(categoryData?.search || '');
   const { width } = useWindowDimensions();
   
-  const numColumns = width > 1200 ? 5 : width > 900 ? 4 : width > 600 ? 3 : 2;
+  // numColumns: on very small screens use 1 col so cards are readable
+  const numColumns = width > 1200 ? 5 : width > 900 ? 4 : width > 600 ? 3 : width > 400 ? 2 : 1;
 
   useEffect(() => {
     const fetchCats = async () => {
       try {
-        // If categories were passed through navigation, use them instead of re-fetching
         if (categoryData?.allCategories && Array.isArray(categoryData.allCategories) && categoryData.allCategories.length > 0) {
           let passedCats = categoryData.allCategories;
-          // Ensure "All" category is present
           if (!passedCats.find((c: any) => c.id === 'all' || c.category === 'all')) {
             passedCats = [{ id: 'all', title: 'All Products', category: 'all', icon: '🌟' }, ...passedCats];
           }
           setCategories(passedCats);
+          setCatLoading(false);
           return;
         }
 
-        console.log('[CategoryProducts] Fetching categories from API');
         const data = await getAllCategories();
-        // getAllCategories already includes "All", but let's be safe
         let allCats = data;
         if (!allCats.find((c: any) => c.id === 'all' || c.category === 'all')) {
           allCats = [{ id: 'all', title: 'All', category: 'all', icon: '🌟' }, ...allCats];
@@ -61,7 +60,6 @@ const CategoryProducts = () => {
   const fetchAllProducts = async () => {
     try {
       setLoading(true);
-      // Fetch all products without server-side filters
       const data = await getFilteredProducts(); 
       setAllProducts(data);
       setError(null);
@@ -77,22 +75,17 @@ const CategoryProducts = () => {
   }, []);
 
   useEffect(() => {
-    // Perform local filtering
     let filtered = [...allProducts];
 
-    // Filter by Category
     if (selectedSideCategory && selectedSideCategory !== 'all') {
       filtered = filtered.filter(p => {
         const catName = getCategoryName(p).toLowerCase();
         const catId = p.categoryId;
-        
-        // Match by ID or by Name/Tag
         return catId === selectedSideCategory || 
                catName === selectedSideCategory.toLowerCase();
       });
     }
 
-    // Filter by Search
     if (localSearch.trim()) {
       const query = localSearch.toLowerCase();
       filtered = filtered.filter(p => 
@@ -131,7 +124,8 @@ const CategoryProducts = () => {
   };
 
   return (
-    <div className="container" style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div className="cp-root">
+      {/* Header */}
       <div className="header">
         <button onClick={() => navigate('HOME')} className="back-button" aria-label="Go back">
            <span className="back-icon">←</span>
@@ -139,27 +133,33 @@ const CategoryProducts = () => {
         <h1 className="header-title">All Categories</h1>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden' }}>
-        <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Body: sidebar + products */}
+      <div className="cp-body">
+
+        {/* Sidebar */}
+        <aside className="sidebar">
           {catLoading ? (
-            <div style={{ padding: 20, textAlign: 'center' }}>
+            <div style={{ padding: '20px 0', textAlign: 'center' }}>
               <ActivityIndicator size="small" color="#2E7D32" />
             </div>
           ) : (
-            <div className="sidebar-list-content" style={{ overflowY: 'auto', flex: 1 }}>
+            <div className="sidebar-list-content">
               {categories.map((item) => {
                 const isActive = selectedSideCategory === (item.tag || item.id || item.name);
+                const label = item.name || item.title || '';
                 return (
                   <button 
                     key={item.id || item.tag || item.name}
                     className={`sidebar-item ${isActive ? 'sidebar-item-active' : ''}`}
                     onClick={() => setSelectedSideCategory(item.tag || item.id || item.name)}
+                    data-label={label}
+                    title={label}
                   >
                     <div className={`sidebar-icon-box ${isActive ? 'sidebar-icon-box-active' : ''}`}>
                       <span className="sidebar-icon">{item.icon || '📦'}</span>
                     </div>
                     <span className={`sidebar-text ${isActive ? 'sidebar-text-active' : ''}`}>
-                      {item.name || item.title}
+                      {label}
                     </span>
                     {isActive && <div className="active-indicator" />}
                   </button>
@@ -169,27 +169,25 @@ const CategoryProducts = () => {
           )}
         </aside>
 
-        <main className="product-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        {/* Product grid */}
+        <main className="cp-main">
           {loading ? (
             <div className="center-container">
               <ActivityIndicator size="large" color="#2E7D32" />
-              <p style={{ marginTop: 15, color: '#666', fontWeight: 600 }}>Refreshing products...</p>
+              <p style={{ marginTop: 15, color: '#666', fontWeight: 600 }}>Loading products...</p>
             </div>
           ) : error ? (
             <div className="center-container">
               <p style={{ color: '#d32f2f', textAlign: 'center', marginBottom: 20 }}>{error}</p>
-              <button className="track-btn" style={{ backgroundColor: '#2E7D32' }} onClick={handleRetry}>
+              <button className="track-btn" style={{ backgroundColor: '#2E7D32', cursor: 'pointer', border: 'none' }} onClick={handleRetry}>
                 <span style={{ color: '#fff', fontWeight: 'bold' }}>Retry</span>
               </button>
             </div>
           ) : (
-            <div className="list-content" style={{ 
-              display: 'grid', 
-              gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
-              gap: '20px',
-              padding: '20px',
-              paddingBottom: '120px'
-            }}>
+            <div
+              className="cp-grid"
+              style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
+            >
               {products.map((item) => (
                 <ProductCard
                   key={item.id}
@@ -202,10 +200,10 @@ const CategoryProducts = () => {
               ))}
               
               {products.length === 0 && (
-                <div style={{ gridColumn: `1 / span ${numColumns}`, textAlign: 'center', paddingTop: 80 }}>
-                  <span style={{ fontSize: 64, marginBottom: 20, opacity: 0.3, display: 'block' }}>🔍</span>
-                  <h2 style={{ fontSize: 20, color: '#333', fontWeight: 700 }}>No Products Found</h2>
-                  <p style={{ fontSize: 14, color: '#666', marginTop: 8 }}>Try adjusting your search or category filters</p>
+                <div className="cp-empty" style={{ gridColumn: `1 / span ${numColumns}` }}>
+                  <span style={{ fontSize: 56, marginBottom: 16, opacity: 0.3, display: 'block' }}>🔍</span>
+                  <h2 style={{ fontSize: 18, color: '#333', fontWeight: 700, margin: '0 0 8px' }}>No Products Found</h2>
+                  <p style={{ fontSize: 13, color: '#888', margin: 0 }}>Try a different category or clear your search</p>
                 </div>
               )}
             </div>
