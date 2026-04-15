@@ -6,7 +6,7 @@
   border-radius: 16px;
   border: 1px solid #eaeaea;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   /* No max-width: cards fill their grid column */
@@ -22,24 +22,30 @@
     height: 140px !important;
     padding: 12px !important;
   }
+
   .product-info {
     padding: 10px 12px 14px !important;
   }
+
   .product-name {
     font-size: 13px !important;
     min-height: unset !important;
   }
+
   .product-weight {
     font-size: 11px !important;
     margin-bottom: 10px !important;
   }
+
   .product-price {
     font-size: 15px !important;
   }
+
   .add-button {
     padding: 0 12px !important;
     height: 32px !important;
   }
+
   .quantity-control {
     height: 32px !important;
     min-width: 82px !important;
@@ -55,7 +61,7 @@
 .product-scroll-container {
   overflow-x: auto !important;
   overflow-y: visible !important;
-  padding: 16px 0 !important;
+  padding: 16px 24px !important; /* Restored horizontal padding for alignment */
 }
 
 .product-card:hover {
@@ -84,7 +90,7 @@
   letter-spacing: 0.6px;
   border: 1.5px solid #E8F5E9;
   z-index: 3;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .product-image-container {
@@ -171,13 +177,13 @@
   justify-content: center !important;
   cursor: pointer;
   border: none !important;
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
   border-radius: 7px;
   transition: all 0.2s ease;
 }
 
 .qty-btn:hover {
-  background: rgba(255,255,255,0.25) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
   transform: scale(1.1);
 }
 
@@ -236,7 +242,7 @@
   margin-bottom: 24px;
   padding: 24px;
   border: 1px solid #f0f0f0;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
   width: 100%;
 }
 
@@ -327,7 +333,7 @@
   border-radius: 20px;
   margin-bottom: 30px;
   border: 1px solid #f0f0f0;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   width: 100%;
 }
 
@@ -362,7 +368,8 @@
   margin-bottom: 4px;
 }
 
-.user-email, .user-phone {
+.user-email,
+.user-phone {
   font-size: 14px;
   color: #666;
   margin-bottom: 2px;
@@ -402,19 +409,85 @@
     padding: 24px 16px;
     text-align: center;
   }
+
   .user-info {
     margin-left: 0 !important;
     margin-top: 16px;
     align-items: center !important;
   }
+
   .edit-btn {
     margin-top: 20px;
     width: 100%;
     justify-content: center !important;
   }
+
   .user-address {
     text-align: center;
     margin-top: 8px;
     line-height: 1.4;
   }
+}
+
+/* Dashboard & Categories Mobile Optimizations */
+@media (max-width: 640px) {
+  .section-title {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+  }
+
+  /* Padding at the 1st card left side and horizontal scroll fix */
+  .product-scroll-container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    gap: 12px !important;
+  }
+
+  .scroll-card-wrapper:first-child {
+    padding-left: 0;
+  }
+
+  /* Fix View More card size for mobile view */
+  .view-all-card {
+    width: 220px !important;
+    min-height: 220px !important;
+    padding: 24px 16px !important;
+  }
+
+  /* Show only icon for See All buttons on mobile */
+  .see-all-btn {
+    padding: 8px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: unset !important;
+  }
+
+  .desktop-btn-text {
+    display: none !important;
+  }
+
+  .mobile-btn-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    width: 100%;
+    height: 100%;
+    margin-top: -3px; /* Fine-tuned adjustment for visual centering of the arrow */
+    margin-left: 1px; /* Slight adjustment for horizontal visual balance */
+  }
+}
+
+/* Global visibility helpers for icon button toggling */
+.mobile-btn-icon {
+  display: none;
+}
+
+.desktop-btn-text {
+  display: inline;
 }

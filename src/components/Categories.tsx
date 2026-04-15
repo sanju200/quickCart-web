@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { getAllProducts, Product, getCategoryName } from '../services/product.service';
-import { addToCart, handleCartQuantityChange, CartItem } from '../services/cart.service';
-import { getOrders, Order, OrderItem } from '../services/order.service';
+import { Product } from '../services/product.service';
+import { CartItem } from '../services/cart.service';
+import { getOrders, Order } from '../services/order.service';
 import { getAllCategories, Category } from '../services/category.service';
 import ProductCard from './ProductCard';
+import '../styles/Categories.css';
 
 const CATEGORY_TABS = [
   { id: '1', title: 'All Products', icon: '🏠', category: 'all' },
@@ -99,60 +98,58 @@ const Categories = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="categories-container">
       {/* Section Header */}
-      <div style={styles.sectionHeader}>
-        <div style={styles.headerTitleRow}>
-          <span style={styles.headerIcon}>🛍️</span>
-          <h2 style={styles.headerTitle}>Shop by Category</h2>
+      <div className="section-header">
+        <div className="header-title-row">
+          <span className="header-icon">🛍️</span>
+          <h2 className="header-title">Shop by Category</h2>
         </div>
         <button
           onClick={() => navigate('CATEGORY_PRODUCTS', { category: 'all', allCategories: gridCategories })}
-          style={styles.seeAllBtn}
+          className="see-all-btn"
         >
-          Explore All Categories
+          <span className="desktop-btn-text">Explore All Categories</span>
+          <span className="mobile-btn-icon">→</span>
         </button>
       </div>
 
       {/* Category Grid - 2x4 for mobile/tablet, flexible for desktop */}
-      <div style={styles.gridContainer}>
+      <div className="grid-container">
         {gridCategories.slice(0, 8).map((item, index) => {
           const bgColor = BG_COLORS[index % BG_COLORS.length];
           const catValue = item.tag || item.id || item.name;
           return (
             <div
               key={item.id}
-              style={styles.gridItem}
+              className="grid-item"
               onClick={() => navigate('CATEGORY_PRODUCTS', { category: catValue, allCategories: gridCategories })}
             >
-              <div style={{ ...styles.iconBox, backgroundColor: bgColor }}>
-                <span style={styles.gridIcon}>{item.icon || '📦'}</span>
+              <div className="icon-box" style={{ backgroundColor: bgColor }}>
+                <span className="grid-icon">{item.icon || '📦'}</span>
               </div>
-              <span style={styles.gridTitle}>{item.name || item.title}</span>
-              <span style={styles.gridSubtext}>Fresh {item.name}</span>
+              <span className="grid-title">{item.name || item.title}</span>
+              <span className="grid-subtext">Fresh {item.name}</span>
             </div>
           );
         })}
       </div>
 
       {/* Specialty Tags Section */}
-      <div style={styles.tagsContainer}>
-        <div style={styles.recentHeader}>
-          <div style={styles.headerTitleRow}>
-            <span style={styles.headerIcon}>✨</span>
-            <h2 style={styles.recentTitle}>Quick Filters</h2>
+      <div className="tags-container">
+        <div className="recent-header">
+          <div className="header-title-row">
+            <span className="header-icon">✨</span>
+            <h2 className="recent-title">Quick Filters</h2>
           </div>
         </div>
-        <div style={styles.tabScroll}>
+        <div className="tab-scroll">
           {CATEGORY_TABS.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                style={{
-                  ...styles.tab,
-                  ...(isActive ? styles.tabActive : styles.tabInactive),
-                }}
+                className={`tab ${isActive ? 'tab-active' : 'tab-inactive'}`}
                 onClick={() => {
                   setActiveTab(item.id);
                   navigate('FILTERED_PRODUCTS', {
@@ -162,8 +159,8 @@ const Categories = () => {
                   });
                 }}
               >
-                <span style={styles.tabIcon}>{item.icon}</span>
-                <span style={styles.tabText}>{item.title}</span>
+                <span className="tab-icon">{item.icon}</span>
+                <span className="tab-text">{item.title}</span>
               </button>
             );
           })}
@@ -171,341 +168,73 @@ const Categories = () => {
       </div>
 
       {/* Recently Ordered Section */}
-      <div style={styles.recentSection}>
-        <div style={styles.recentHeader}>
-          <div style={styles.headerTitleRow}>
-            <span style={styles.headerIcon}>🕒</span>
-            <h2 style={styles.recentTitle}>Your Regular Purchases</h2>
-          </div>
-          <button
-            onClick={() => navigate('PREVIOUSLY_ORDERED')}
-            style={styles.seeAllBtn}
-          >
-            Reorder History →
-          </button>
-        </div>
-
-        {loading ? (
-          <div style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#2E7D32" />
-          </div>
-        ) : error ? (
-          <div style={styles.loaderContainer}>
-            <span style={styles.errorText}>{error}</span>
-            <button onClick={fetchRecentlyOrdered} style={styles.retryBtn}>
-              Tap to Retry
+      <div className="recent-section">
+        <div className="recent-content-wrapper">
+          <div className="recent-header">
+            <div className="header-title-row">
+              <span className="header-icon">🕒</span>
+              <h2 className="recent-title">Your Regular Purchases</h2>
+            </div>
+            <button
+              onClick={() => navigate('PREVIOUSLY_ORDERED')}
+              className="see-all-btn"
+            >
+              <span className="desktop-btn-text">Reorder History →</span>
+              <span className="mobile-btn-icon">→</span>
             </button>
           </div>
-        ) : recentlyOrdered.length > 0 ? (
-          <div style={styles.productScroll} className="product-scroll-container">
-            {recentlyOrdered.slice(0, 10).map((item) => (
-              <div key={item.id} style={{ flexShrink: 0 }} className="scroll-card-wrapper">
-                <ProductCard
-                  item={item}
-                  quantity={getProductQuantity(item.id)}
-                  onAdd={handleAddToCart}
-                  onUpdateQuantity={handleUpdateQuantity}
-                  numColumns={4}
-                />
-              </div>
-            ))}
-            {/* View More card — always visible */}
-            <div style={{ flexShrink: 0 }} className="scroll-card-wrapper">
-              <button
-                style={styles.viewAllCard}
-                onClick={() => navigate('PREVIOUSLY_ORDERED')}
-              >
-                <div style={styles.viewAllIconContainer}>
-                  <span style={styles.viewAllIcon}>→</span>
-                </div>
-                <span style={styles.viewAllText}>View More</span>
-                <span style={styles.viewAllSubText}>See all ordered items</span>
+
+          {loading ? (
+            <div className="loader-container">
+              <ActivityIndicator size="large" color="#2E7D32" />
+            </div>
+          ) : error ? (
+            <div className="loader-container">
+              <span className="error-text">{error}</span>
+              <button onClick={fetchRecentlyOrdered} className="retry-btn">
+                Tap to Retry
               </button>
             </div>
-          </div>
-        ) : (
-          <div style={styles.emptyRecentContainer}>
-            <div style={styles.emptyRecentIconBox}>
-              <span style={styles.emptyRecentIcon}>🛍️</span>
+          ) : recentlyOrdered.length > 0 ? (
+            <div className="product-scroll">
+              {recentlyOrdered.slice(0, 10).map((item) => (
+                <div key={item.id} className="scroll-card-wrapper">
+                  <ProductCard
+                    item={item}
+                    quantity={getProductQuantity(item.id)}
+                    onAdd={handleAddToCart}
+                    onUpdateQuantity={handleUpdateQuantity}
+                    numColumns={4}
+                  />
+                </div>
+              ))}
+              {/* View More card — always visible */}
+              <div className="scroll-card-wrapper">
+                <button
+                  className="view-all-card"
+                  onClick={() => navigate('PREVIOUSLY_ORDERED')}
+                >
+                  <div className="view-all-icon-container">
+                    <span className="view-all-icon">→</span>
+                  </div>
+                  <span className="view-all-text">View More</span>
+                  <span className="view-all-sub-text">See all ordered items</span>
+                </button>
+              </div>
             </div>
-            <span style={styles.emptyRecentText}>No recent orders yet</span>
-            <span style={styles.emptyRecentSubText}>Your ordered items will appear here for easy reordering</span>
-          </div>
-        )}
+          ) : (
+            <div className="empty-recent-container">
+              <div className="empty-recent-icon-box">
+                <span className="empty-recent-icon">🛍️</span>
+              </div>
+              <span className="empty-recent-text">No recent orders yet</span>
+              <span className="empty-recent-sub-text">Your ordered items will appear here for easy reordering</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '40px 0',
-    backgroundColor: '#fff',
-    width: '100%',
-  },
-  sectionHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 24px',
-    marginBottom: 24,
-  },
-  headerTitleRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerIcon: {
-    fontSize: 26,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 900,
-    color: '#1a1a1a',
-    margin: 0,
-    letterSpacing: -0.5,
-  },
-  seeAllBtn: {
-    fontSize: 14,
-    color: '#2E7D32',
-    fontWeight: 800,
-    border: '2px solid #E8F5E9',
-    background: '#fff',
-    cursor: 'pointer',
-    padding: '10px 20px',
-    borderRadius: 12,
-    transition: 'all 0.2s ease',
-  },
-
-  /* Category Grid */
-  gridContainer: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: 20,
-    padding: '0 24px',
-    marginBottom: 48,
-    width: '100%',
-  },
-  gridItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '30px 16px',
-    borderRadius: 24,
-    backgroundColor: '#fff',
-    border: '1px solid #f0f0f0',
-    cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-    position: 'relative',
-  },
-  iconBox: {
-    width: 96,
-    height: 96,
-    borderRadius: 32,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    transition: 'transform 0.3s ease',
-  },
-  gridIcon: {
-    fontSize: 48,
-  },
-  gridTitle: {
-    fontSize: 18,
-    fontWeight: 800,
-    color: '#1a1a1a',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  gridSubtext: {
-    fontSize: 12,
-    color: '#888',
-    fontWeight: 600,
-  },
-
-  /* Tags Section */
-  tagsContainer: {
-    marginBottom: 48,
-  },
-  tabScroll: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-    gap: 12,
-    padding: '0 24px',
-  },
-  tab: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '14px 16px',
-    borderRadius: 16,
-    border: '1.5px solid transparent',
-    cursor: 'pointer',
-    gap: 10,
-    transition: 'all 0.2s ease',
-  },
-  tabActive: {
-    background: 'linear-gradient(135deg, #2E7D32, #66BB6A)',
-    color: '#fff',
-    boxShadow: '0 6px 15px rgba(46,125,50,0.25)',
-  },
-  tabInactive: {
-    backgroundColor: '#F8F9FA',
-    border: '1.5px solid #eee',
-    color: '#555',
-  },
-  tabIcon: {
-    fontSize: 18,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: 800,
-    letterSpacing: 0.3,
-  },
-
-  /* Recently Ordered */
-  recentSection: {
-    backgroundColor: '#F1F8E9',
-    padding: '40px 0',
-    width: '100%',
-  },
-  recentHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0 24px',
-    marginBottom: 24,
-  },
-  recentTitle: {
-    fontSize: 24,
-    fontWeight: 900,
-    color: '#1a1a1a',
-    margin: 0,
-    letterSpacing: -0.5,
-  },
-  productScroll: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 16,
-    padding: '8px 24px 24px',
-    overflowX: 'auto' as any,
-    overflowY: 'visible' as any,
-    msOverflowStyle: 'none',
-    scrollbarWidth: 'none',
-  },
-  loaderContainer: {
-    height: 240,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: '#d32f2f',
-    fontSize: 15,
-    marginBottom: 10,
-  },
-  retryBtn: {
-    color: '#2E7D32',
-    fontWeight: 800,
-    padding: '8px 16px',
-    border: '1.5px solid #2E7D32',
-    borderRadius: 8,
-    background: 'none',
-    cursor: 'pointer',
-  },
-  emptyRecentContainer: {
-    height: 240,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-    backgroundColor: 'rgba(255,255,255,0.6)',
-    margin: '0 24px',
-    borderRadius: 32,
-    border: '2px dashed #A5D6A7',
-    gap: 12,
-    padding: 32,
-    textAlign: 'center',
-  },
-  emptyRecentIconBox: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#fff',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-    marginBottom: 10,
-  },
-  emptyRecentIcon: {
-    fontSize: 32,
-  },
-  emptyRecentText: {
-    color: '#1a1a1a',
-    fontSize: 20,
-    fontWeight: 800,
-  },
-  emptyRecentSubText: {
-    color: '#666',
-    fontSize: 15,
-    maxWidth: 300,
-    lineHeight: 1.5,
-  },
-  viewAllCard: {
-    width: 220,
-    height: '100%',
-    minHeight: 280,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    border: '1.5px solid #E8F5E9',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '32px 24px',
-    cursor: 'pointer',
-    flexShrink: 0,
-    gap: 14,
-    transition: 'all 0.3s ease',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-  },
-  viewAllIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    background: 'linear-gradient(135deg, #2E7D32, #43A047)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 6px 20px rgba(46,125,50,0.25)',
-    transition: 'transform 0.3s ease',
-  },
-  viewAllIcon: {
-    color: '#fff',
-    fontSize: 26,
-    fontWeight: 700,
-  },
-  viewAllText: {
-    color: '#1a1a1a',
-    fontSize: 16,
-    fontWeight: 800,
-    textAlign: 'center' as const,
-    lineHeight: 1.3,
-  },
-  viewAllSubText: {
-    color: '#888',
-    fontSize: 12,
-    fontWeight: 500,
-    textAlign: 'center' as const,
-  },
 };
 
 export default Categories;
