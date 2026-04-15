@@ -1,4 +1,8 @@
 import { Storage as AsyncStorage } from './storage.service';
+import { apiFetch } from './api.utility';
+import { getAuthToken, logoutUser, handleUnauthorized } from './auth.utility';
+
+export { getAuthToken, logoutUser, handleUnauthorized };
 
 const BASE_URL = '';
 const API_URL = `${BASE_URL}/auth`;
@@ -90,22 +94,6 @@ export const signupUser = async (name: string, email: string, password: string) 
     }
 };
 
-export const logoutUser = async () => {
-    try {
-        await AsyncStorage.multiRemove(['authToken', 'userData']);
-    } catch (error) {
-        console.error('Error during logout:', error);
-    }
-};
-
-export const getAuthToken = async () => {
-    try {
-        return await AsyncStorage.getItem('authToken');
-    } catch (error) {
-        return null;
-    }
-};
-
 export const saveUserData = async (userData: UserData) => {
     try {
         await AsyncStorage.setItem('userData', JSON.stringify(userData));
@@ -149,26 +137,22 @@ export const getUserData = async (): Promise<UserData | null> => {
 
 export const updateProfile = async (userData: UserData) => {
     try {
-        const token = await getAuthToken();
         const { id, ...rest } = userData;
         // Clean the payload to strictly follow backend expectations
         const updateData: any = {};
         if (rest.addresses) updateData.addresses = rest.addresses;
         if (rest.phone) updateData.phone = rest.phone;
 
-        console.log('[DEBUG] Updating profile with payload:', updateData, 'using token:', !!token);
+        console.log('[DEBUG] Updating profile with payload:', updateData);
 
-        // Using specific user ID endpoint as requested
-        const response = await fetch(`${BASE_URL}/users/${id}`, {
+        // Using centralized apiFetch instead of raw fetch
+        const response = await apiFetch(`${BASE_URL}/users/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            },
             body: JSON.stringify(updateData),
         });
 
         const data = await response.json();
+        
         if (!response.ok) {
             throw new Error(data.message || 'Update failed');
         }
@@ -201,26 +185,19 @@ export const updateProfile = async (userData: UserData) => {
         await saveUserData(updatedUser);
         return updatedUser;
     } catch (error: any) {
+        if (error.message === 'Unauthorized') throw error;
         throw new Error(error.message || 'An error occurred during update');
     }
 };
+
 export const getMe = async (): Promise<UserData | null> => {
     try {
-        const token = await getAuthToken();
-        if (!token) return null;
-
-        const response = await fetch(`${BASE_URL}/users/me`, {
+        // Using centralized apiFetch instead of raw fetch
+        const response = await apiFetch(`${BASE_URL}/users/me`, {
             method: 'GET',
-            headers: {
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            },
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                // If unauthorized, clear the session
-                await logoutUser();
-            }
             return null;
         }
 
@@ -234,7 +211,8 @@ export const getMe = async (): Promise<UserData | null> => {
         }
         
         return data;
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'Unauthorized') return null;
         console.error('Error fetching user profile:', error);
         return null;
     }

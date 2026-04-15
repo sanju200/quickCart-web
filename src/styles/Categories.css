@@ -27,11 +27,10 @@
 }
 
 .header-title {
-  font-size: 28px;
-  font-weight: 900;
-  color: #1a1a1a;
-  margin: 0;
-  letter-spacing: -0.5px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-left: 8px;
 }
 
 .see-all-btn {
@@ -134,7 +133,7 @@
 
 .tab-scroll {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
   padding: 0 24px;
 }

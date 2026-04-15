@@ -1,5 +1,6 @@
-import { getAuthToken, getUserData } from './authentication.service';
+import { getUserData } from './authentication.service';
 import { Product } from './product.service';
+import { apiFetch } from './api.utility';
 
 const BASE_URL = '';
 const API_URL = `${BASE_URL}/cart`;
@@ -19,18 +20,6 @@ export interface Cart {
     totalAmount: number;
 }
 
-const getHeaders = async () => {
-    const token = await getAuthToken();
-    const headers: any = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-};
-
 export async function handleCartQuantityChange(productId: string, newQuantity: number) {
     if (newQuantity <= 0) {
         return await removeFromCart(productId);
@@ -45,13 +34,11 @@ export const updateCartQuantity = async (productId: string, quantity: number) =>
         const user = await getUserData();
         if (!user || !user.id) throw new Error('User not logged in');
 
-        const headers = await getHeaders();
         const url = `${API_URL}/${user.id}/update/${productId}`;
         console.log(`[CartService] Updating item: ${url} with quantity: ${quantity}`);
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: 'PUT',
-            headers: headers,
             body: JSON.stringify({ quantity }),
         });
 
@@ -61,6 +48,7 @@ export const updateCartQuantity = async (productId: string, quantity: number) =>
         }
         return await response.json();
     } catch (error: any) {
+        if (error.message === 'Unauthorized') throw error;
         console.error('Error updating cart quantity:', error);
         throw error;
     }
@@ -75,10 +63,8 @@ export const getCart = async (): Promise<CartItem[]> => {
 
     cartPromise[cacheKey] = (async () => {
         try {
-            const headers = await getHeaders();
-            const response = await fetch(`${API_URL}/${user.id}`, {
+            const response = await apiFetch(`${API_URL}/${user.id}`, {
                 method: 'GET',
-                headers: headers,
             });
 
             if (!response.ok) {
@@ -93,6 +79,7 @@ export const getCart = async (): Promise<CartItem[]> => {
                 productId: item.productId || item.product?.id || item.product?._id || item.id || item._id
             }));
         } catch (error: any) {
+            if (error.message === 'Unauthorized') return [];
             console.error('Error fetching cart:', error);
             delete cartPromise[cacheKey];
             throw error;
@@ -112,10 +99,8 @@ export const addToCart = async (productId: string, quantity: number = 1) => {
         const user = await getUserData();
         if (!user || !user.id) throw new Error('User not logged in');
 
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/${user.id}/add`, {
+        const response = await apiFetch(`${API_URL}/${user.id}/add`, {
             method: 'POST',
-            headers: headers,
             body: JSON.stringify({ productId, quantity }),
         });
 
@@ -125,6 +110,7 @@ export const addToCart = async (productId: string, quantity: number = 1) => {
         }
         return await response.json();
     } catch (error: any) {
+        if (error.message === 'Unauthorized') throw error;
         console.error('Error adding to cart:', error);
         throw error;
     }
@@ -136,13 +122,11 @@ export const removeFromCart = async (productId: string) => {
         const user = await getUserData();
         if (!user || !user.id) throw new Error('User not logged in');
 
-        const headers = await getHeaders();
         const url = `${API_URL}/${user.id}/remove/${productId}`;
         console.log(`[CartService] Removing item: ${url}`);
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: 'DELETE',
-            headers: headers,
         });
 
         if (!response.ok) {
@@ -151,6 +135,7 @@ export const removeFromCart = async (productId: string) => {
         }
         return await response.json();
     } catch (error: any) {
+        if (error.message === 'Unauthorized') throw error;
         console.error('Error removing from cart:', error);
         throw error;
     }
@@ -161,12 +146,10 @@ export const clearCart = async () => {
         const user = await getUserData();
         if (!user || !user.id) throw new Error('User not logged in');
 
-        const headers = await getHeaders();
         const url = `${API_URL}/${user.id}/clear`;
 
-        const response = await fetch(url, {
+        const response = await apiFetch(url, {
             method: 'DELETE',
-            headers: headers,
         });
 
         if (!response.ok) {
@@ -177,6 +160,7 @@ export const clearCart = async () => {
         const text = await response.text();
         return text ? JSON.parse(text) : {};
     } catch (error: any) {
+        if (error.message === 'Unauthorized') throw error;
         console.error('Error clearing cart:', error);
         throw error;
     }
