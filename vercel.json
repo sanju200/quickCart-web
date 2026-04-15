@@ -2,6 +2,43 @@
   "rewrites": [
     {
       "source": "/auth/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/html.*"
+        }
+      ],
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cart/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/html.*"
+        }
+      ],
+      "destination": "/index.html"
+    },
+    {
+      "source": "/order/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": ".*text/html.*"
+        }
+      ],
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/:path*",
       "destination": "https://quickcart-backend-production-e087.up.railway.app/auth/:path*"
     },
     {
