@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '');
   
-  const API_TARGET = env.VITE_API_TARGET || 'https://quickcart-backend-production-e087.up.railway.app';
+  const API_TARGET = env.VITE_API_TARGET || 'https://quickcart-backend-xi.vercel.app';
 
   /**
    * Refined Proxy Logic:

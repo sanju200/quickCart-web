@@ -39,39 +39,39 @@
     },
     {
       "source": "/auth/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/auth/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/auth/:path*"
     },
     {
       "source": "/cart/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/cart/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/cart/:path*"
     },
     {
       "source": "/categories/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/categories/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/categories/:path*"
     },
     {
       "source": "/product/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/product/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/product/:path*"
     },
     {
       "source": "/order/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/order/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/order/:path*"
     },
     {
       "source": "/offer/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/offer/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/offer/:path*"
     },
     {
       "source": "/admin/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/admin/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/admin/:path*"
     },
     {
       "source": "/users/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/users/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/users/:path*"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://quickcart-backend-production-e087.up.railway.app/api/:path*"
+      "destination": "https://quickcart-backend-xi.vercel.app/api/:path*"
     },
     {
       "source": "/(.*)",
