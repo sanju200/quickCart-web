@@ -89,6 +89,12 @@ function App() {
     if (manualData) {
       setUserData(manualData);
       if (manualData.role) setUserRole(manualData.role);
+    } else {
+      const data = await getMe() || await getUserData();
+      if (data) {
+        setUserData(data);
+        if (data.role) setUserRole(data.role);
+      }
     }
   };
 
@@ -182,25 +188,33 @@ function App() {
         if (!token) {
           setCurrentScreen('LOGIN');
         } else {
-          // Perform a live check against the server
-          const data = await getMe();
-          if (data) {
-            setUserData(data);
-            setUserRole(data?.role || 'USER');
-            
-            // Sync current state from URL if it's not home
-            const initialPath = window.location.pathname.slice(1).toUpperCase().replace(/-/g, '_');
-            if (initialPath && initialPath !== '' && initialPath !== 'LOGIN') {
-              setCurrentScreen(initialPath as Screen);
-            } else {
-              setCurrentScreen('HOME');
-            }
-            
-            refreshCartCount();
-          } else {
-            // Token is invalid or expired
-            setCurrentScreen('LOGIN');
+          // 1. Immediately hydrate with cached user data for instant display
+          const cachedUser = await getUserData();
+          if (cachedUser) {
+            setUserData(cachedUser);
+            setUserRole(cachedUser?.role || 'USER');
           }
+
+          // 2. Perform live check against server to refresh profile
+          const serverUser = await getMe();
+          if (serverUser) {
+            setUserData(serverUser);
+            setUserRole(serverUser?.role || 'USER');
+          } else if (!cachedUser) {
+            // Token is invalid or expired and no cached user exists
+            setCurrentScreen('LOGIN');
+            return;
+          }
+            
+          // Sync current state from URL if it's not home
+          const initialPath = window.location.pathname.slice(1).toUpperCase().replace(/-/g, '_');
+          if (initialPath && initialPath !== '' && initialPath !== 'LOGIN') {
+            setCurrentScreen(initialPath as Screen);
+          } else {
+            setCurrentScreen('HOME');
+          }
+            
+          refreshCartCount();
         }
       } catch (error) {
         setCurrentScreen('LOGIN');

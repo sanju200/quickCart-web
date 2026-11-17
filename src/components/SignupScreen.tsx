@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useUser } from '../context/AppContext';
 import { signupUser, loginUser } from '../services/authentication.service';
 import ToastNotification from './ToastNotification';
 
 const SignupScreen = () => {
   const { navigate } = useAppNavigation();
+  const { refreshUserData } = useUser();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +30,8 @@ const SignupScreen = () => {
     try {
       setLoading(true);
       await signupUser(name, email, password);
-      await loginUser(email, password);
+      const user = await loginUser(email, password);
+      await refreshUserData(user);
       showToast('Account created successfully!', 'success');
       setTimeout(() => navigate('HOME'), 1200);
     } catch (err: any) {

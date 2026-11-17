@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { useAppNavigation, useUser } from '../context/AppContext';
-import { logoutUser, UserData } from '../services/authentication.service';
+import { logoutUser } from '../services/authentication.service';
 import '../styles/common.css';
 import '../styles/components.css';
 import '../styles/forms.css';
@@ -24,12 +19,28 @@ const PROFILE_OPTIONS = [
 
 const ProfileScreen = () => {
   const { navigate } = useAppNavigation();
-  const { userData } = useUser();
-  const loading = !userData;
+  const { userData, refreshUserData } = useUser();
 
-  const getInitial = (name: string) => name.charAt(0).toUpperCase();
+  useEffect(() => {
+    refreshUserData();
+  }, []);
+
+  const getInitial = (name?: string, email?: string) => {
+    if (name && name.trim()) return name.trim().charAt(0).toUpperCase();
+    if (email && email.trim()) return email.trim().charAt(0).toUpperCase();
+    return '?';
+  };
 
   const user = userData;
+  const loading = !user;
+
+  const activeAddress = user?.addresses?.find((a: any) => a.isSelected) || user?.addresses?.[0];
+
+  const formatAddress = (addr: any) => {
+    if (!addr) return '';
+    const parts = [addr.streetAddress, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
+    return parts.join(', ');
+  };
 
   return (
     <div className="container">
@@ -43,26 +54,59 @@ const ProfileScreen = () => {
       <div className="scroll-content">
         <div className="content-wrapper">
           {loading ? (
-            <div className="user-card" style={{ justifyContent: 'center' }}>
+            <div className="user-card" style={{ justifyContent: 'center', padding: '30px' }}>
               <ActivityIndicator size="small" color="#2E7D32" />
             </div>
           ) : (
             <div className="user-card">
               <div className="avatar-fallback">
                 <span className="avatar-initial">
-                  {user?.name ? getInitial(user.name) : '?'}
+                  {getInitial(user?.name, user?.email)}
                 </span>
               </div>
               <div className="user-info">
-                <h2 className="user-name">{user?.name || 'User'}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h2 className="user-name" style={{ margin: 0 }}>{user?.name || 'User'}</h2>
+                  {user?.role && (
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      backgroundColor: user.role === 'ADMIN' ? '#FFEBEE' : '#E8F5E9',
+                      color: user.role === 'ADMIN' ? '#D32F2F' : '#2E7D32',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {user.role.replace(/_/g, ' ')}
+                    </span>
+                  )}
+                </div>
                 <span className="user-email">{user?.email || 'No email registered'}</span>
-                {user?.phone && <span className="user-phone">{user.phone}</span>}
-                {user?.addresses?.find(a => a.isSelected) && (
+                
+                {user?.phone ? (
+                  <span className="user-phone">📞 {user.phone}</span>
+                ) : (
+                  <span 
+                    className="user-phone" 
+                    style={{ color: '#2E7D32', cursor: 'pointer', fontSize: '12px' }}
+                    onClick={() => navigate('EDIT_PROFILE', { from: 'PROFILE' })}
+                  >
+                    + Add phone number
+                  </span>
+                )}
+
+                {activeAddress ? (
                   <span className="user-address" style={{ display: 'block', marginTop: 4, lineHeight: '1.4' }}>
-                    📍 {(() => {
-                      const a = user.addresses!.find(addr => addr.isSelected)!;
-                      return `${a.streetAddress}, ${a.city}, ${a.state} ${a.postalCode}, ${a.country}`;
-                    })()}
+                    📍 {formatAddress(activeAddress)}
+                  </span>
+                ) : (
+                  <span 
+                    className="user-address" 
+                    style={{ display: 'block', marginTop: 4, color: '#2E7D32', cursor: 'pointer', fontSize: '13px' }}
+                    onClick={() => navigate('SAVED_ADDRESSES', { from: 'PROFILE' })}
+                  >
+                    + Add delivery address
                   </span>
                 )}
               </div>
@@ -99,7 +143,7 @@ const ProfileScreen = () => {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: 16, fontWeight: 700, color: '#1B5E20' }}>
-                  {user.role.replace('_', ' ')} Dashboard
+                  {user.role.replace(/_/g, ' ')} Dashboard
                 </span>
                 <span style={{ fontSize: 12, color: '#2E7D32', marginTop: 2, opacity: 0.8 }}>Manage orders and fulfillment tasks</span>
               </div>
@@ -165,7 +209,5 @@ const ProfileScreen = () => {
     </div>
   );
 };
-
-
 
 export default ProfileScreen;

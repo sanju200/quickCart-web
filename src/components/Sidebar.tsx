@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { useAppNavigation, useCartCount, Screen } from '../context/AppContext';
+import { useAppNavigation, useCartCount, useUser, Screen } from '../context/AppContext';
 
 const SIDEBAR_WIDTH = 250;
 
 const Sidebar = () => {
   const { navigate, currentScreen, userRole, isSidebarOpen, toggleSidebar } = useAppNavigation();
   const { cartCount } = useCartCount();
+  const { userData } = useUser();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,6 +59,31 @@ const Sidebar = () => {
             </svg>
           </button>
         </div>
+
+        {/* User Profile Card */}
+        {userData && (
+          <div 
+            style={styles.userProfileCard}
+            onClick={() => {
+              navigate('PROFILE');
+              toggleSidebar();
+            }}
+          >
+            <div style={styles.userAvatar}>
+              <span style={styles.userAvatarText}>
+                {userData.name ? userData.name.trim().charAt(0).toUpperCase() : (userData.email ? userData.email.charAt(0).toUpperCase() : '?')}
+              </span>
+            </div>
+            <div style={styles.userInfo}>
+              <span style={styles.userName}>{userData.name || 'User'}</span>
+              <span style={styles.userEmail}>{userData.email}</span>
+              <span style={styles.userRoleTag}>
+                {userData.role?.replace(/_/g, ' ') || 'CUSTOMER'}
+              </span>
+            </div>
+            <span style={styles.profileArrow}>›</span>
+          </div>
+        )}
 
         {/* Menu Items */}
         <div style={styles.menuContainer}>
@@ -139,6 +165,68 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottom: '1px solid #f0f0f0',
+  },
+  userProfileCard: {
+    margin: '12px 12px 6px',
+    padding: '12px',
+    borderRadius: 14,
+    backgroundColor: '#F1F8E9',
+    border: '1px solid #DCEDC8',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  userAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#2E7D32',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  userAvatarText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 700,
+  },
+  userInfo: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+  },
+  userName: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#1a1a1a',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  userEmail: {
+    fontSize: 11,
+    color: '#666',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  userRoleTag: {
+    fontSize: 9,
+    fontWeight: 800,
+    color: '#2E7D32',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  profileArrow: {
+    fontSize: 18,
+    color: '#2E7D32',
+    fontWeight: 700,
   },
   logoRow: {
     display: 'flex',

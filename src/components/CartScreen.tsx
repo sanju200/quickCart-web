@@ -3,19 +3,18 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import '../styles/CartScreen.css';
-import { useAppNavigation, useCartCount } from '../context/AppContext';
-import { getUserData, UserData } from '../services/authentication.service';
+import { useAppNavigation, useCartCount, useUser } from '../context/AppContext';
+import { UserData } from '../services/authentication.service';
 
 const CartScreen = () => {
   const { navigate } = useAppNavigation();
   const { cartItems: items, refreshCartCount, updateQtyOptimistic } = useCartCount();
+  const { userData: user } = useUser();
   const [loading] = useState(false);
   const [error] = useState<string | null>(null);
-  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     refreshCartCount();
-    getUserData().then(data => setUser(data));
   }, []);
 
   const handleUpdateQuantity = async (productId: string, currentQty: number, delta: number) => {
@@ -37,6 +36,10 @@ const CartScreen = () => {
   const total = items.length > 0 ? subtotal + deliveryFee + handlingFee : 0;
 
   const handleProceed = () => {
+    if (!user?.addresses || user.addresses.length === 0) {
+      navigate('SAVED_ADDRESSES', { from: 'CART' });
+      return;
+    }
     navigate('PAYMENTS', { items, total });
   };
 
@@ -65,7 +68,16 @@ const CartScreen = () => {
               {/* Delivery Banner */}
               <div className="delivery-banner">
                 <span className="delivery-icon">⚡</span>
-                <span className="delivery-text">Delivery in 8 mins to Home</span>
+                <span className="delivery-text">
+                  {user?.addresses && user.addresses.length > 0 ? (
+                    (() => {
+                      const selected = user.addresses.find(a => a.isSelected) || user.addresses[0];
+                      return `Delivery in 8 mins to ${selected.type} (${selected.streetAddress}, ${selected.city})`;
+                    })()
+                  ) : (
+                    'Delivery in 8 mins • No address selected'
+                  )}
+                </span>
               </div>
 
               {/* Items Card */}
@@ -132,7 +144,7 @@ const CartScreen = () => {
                   className="desktop-pay-btn"
                   onClick={handleProceed}
                 >
-                  {user?.addresses?.some(addr => addr.isSelected) ? 'Proceed to Pay →' : 'Select Delivery Address'}
+                  {user?.addresses && user.addresses.length > 0 ? 'Proceed to Pay →' : 'Set Delivery Address'}
                 </button>
               </div>
 
@@ -183,7 +195,7 @@ const CartScreen = () => {
               }}
               onClick={handleProceed}
             >
-              {user?.addresses?.some(addr => addr.isSelected) ? 'Proceed to Pay →' : 'Set Address'}
+              {user?.addresses && user.addresses.length > 0 ? 'Proceed to Pay →' : 'Set Address'}
             </button>
           </div>
         </div>

@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useAppNavigation } from '../context/AppContext';
-import { getUserData, UserData } from '../services/authentication.service';
+import { useAppNavigation, useUser } from '../context/AppContext';
+import { UserData } from '../services/authentication.service';
 
 const ContactDetailsScreen = () => {
   const { navigate, categoryData } = useAppNavigation();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { userData, refreshUserData } = useUser();
 
   useEffect(() => {
-    const loadUserData = async () => {
-      const data = await getUserData();
-      setUser(data);
-      setLoading(false);
-    };
-    loadUserData();
+    refreshUserData();
   }, []);
 
-  const getInitial = (name: string) => name.charAt(0).toUpperCase();
+  const user: UserData | null = userData;
+  const loading = !user;
+
+  const getInitial = (name?: string, email?: string) => {
+    if (name && name.trim()) return name.trim().charAt(0).toUpperCase();
+    if (email && email.trim()) return email.trim().charAt(0).toUpperCase();
+    return 'QC';
+  };
+
+  const activeAddress = user?.addresses?.find((a: any) => a.isSelected) || user?.addresses?.[0];
+  const addressText = activeAddress 
+    ? [activeAddress.streetAddress, activeAddress.city, activeAddress.state, activeAddress.postalCode].filter(Boolean).join(', ') 
+    : 'Not Provided';
 
   if (loading) {
     return (
@@ -88,10 +92,24 @@ const ContactDetailsScreen = () => {
                 boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
               }}>
                 <span style={{ fontSize: 60, color: '#fff', fontWeight: 900 }}>
-                  {user?.name ? getInitial(user.name) : 'QC'}
+                  {getInitial(user?.name, user?.email)}
                 </span>
               </div>
               <h2 style={{ fontSize: 32, fontWeight: 900, color: '#f8fafc', margin: '0 0 10px 0' }}>{user?.name || 'Member'}</h2>
+              {user?.role && (
+                <span style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  color: '#94a3b8',
+                  padding: '4px 12px',
+                  borderRadius: 20,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1
+                }}>
+                  {user.role.replace(/_/g, ' ')}
+                </span>
+              )}
             </div>
 
             {/* Right Column: Details Grid */}
@@ -103,7 +121,7 @@ const ContactDetailsScreen = () => {
                    <HorizontalInfo icon="👤" label="Full Name" value={user?.name} />
                    <HorizontalInfo icon="✉️" label="Email Address" value={user?.email} />
                    <HorizontalInfo icon="📞" label="Phone Number" value={user?.phone} />
-                   <HorizontalInfo icon="📅" label="Last Updated" value={new Date().toLocaleDateString()} />
+                   <HorizontalInfo icon="📍" label="Primary Address" value={addressText} />
                 </div>
               </div>
 

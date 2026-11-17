@@ -27,7 +27,7 @@ const SavedAddressesScreen = () => {
   const [newCountry, setNewCountry] = useState('');
 
   useEffect(() => {
-    // User data is now managed globally by App.tsx on navigation
+    refreshUserData();
   }, []);
 
   const handleSetDefault = async (index: number) => {

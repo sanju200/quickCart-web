@@ -148,15 +148,46 @@
 }
 
 .profile-button {
-  width: 44px;
   height: 44px;
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-  border: none;
-  background: none;
+  gap: 10px;
+  border: 1px solid #edf2ed;
+  background: #f7faf7;
+  border-radius: 50px;
   cursor: pointer;
-  padding: 0;
+  padding: 2px 14px 2px 2px;
+  transition: all 0.2s ease;
+}
+
+.profile-button:hover {
+  background-color: #f0f7f0;
+  border-color: #2E7D32;
+  box-shadow: 0 4px 12px rgba(46,125,50,0.08);
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.header-user-greeting {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.header-user-role {
+  font-size: 10px;
+  font-weight: 800;
+  color: #2E7D32;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
 
 .profile-avatar-fallback {
@@ -309,7 +340,19 @@
     font-size: 22px;
   }
 
-  .profile-button, .cart-button, .add-product-btn {
+  .header-user-info {
+    display: none;
+  }
+
+  .profile-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+
+  .cart-button, .add-product-btn {
     width: 40px;
     height: 40px;
   }

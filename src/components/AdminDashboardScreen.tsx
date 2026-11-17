@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useAppNavigation } from '../context/AppContext';
+import { useAppNavigation, useUser } from '../context/AppContext';
 import { getAllCategories } from '../services/category.service';
 import { getAdminStats, AdminStats } from '../services/admin.service';
 import '../styles/dashboard.css';
 
 const AdminDashboardScreen = () => {
   const { navigate } = useAppNavigation();
+  const { userData } = useUser();
   const [stats, setStats] = useState<AdminStats>({
     totalRevenue: 0,
     activeOrders: 0,
@@ -61,7 +62,9 @@ const AdminDashboardScreen = () => {
       <div style={dashboardStyles.adminPortalBanner} className="dashboard-banner">
         <div style={dashboardStyles.bannerContent} className="banner-content">
           <div style={dashboardStyles.bannerText}>
-            <span style={dashboardStyles.welcomeLabel}>ADMIN PORTAL</span>
+            <span style={dashboardStyles.welcomeLabel}>
+              ADMIN PORTAL {userData?.name ? `• WELCOME ${userData.name.toUpperCase()}` : ''}
+            </span>
             <h1 style={dashboardStyles.bannerTitle}>QuickCart Terminal</h1>
             <p style={dashboardStyles.bannerSubtitle}>Real-time system overview and infrastructure control</p>
           </div>

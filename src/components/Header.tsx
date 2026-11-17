@@ -18,19 +18,31 @@ const Header = () => {
 
   const formatAddress = (address: any) => {
     if (!address) return 'Set Location';
-    const full = `${address.streetAddress}, ${address.city}`;
+    const street = address.streetAddress || address.street || '';
+    const city = address.city || '';
+    const full = [street, city].filter(Boolean).join(', ') || 'Set Location';
     const words = full.split(' ');
-    if (words.length > 6) {
-      return words.slice(0, 6).join(' ') + '...';
+    if (words.length > 5) {
+      return words.slice(0, 5).join(' ') + '...';
     }
     return full;
   };
 
   const getInitial = (user: any) => {
-    if (user?.name) return user.name.charAt(0).toUpperCase();
-    if (user?.firstName) return user.firstName.charAt(0).toUpperCase();
-    if (user?.email) return user.email.charAt(0).toUpperCase();
+    if (user?.name && user.name.trim()) return user.name.trim().charAt(0).toUpperCase();
+    if (user?.firstName && user.firstName.trim()) return user.firstName.trim().charAt(0).toUpperCase();
+    if (user?.email && user.email.trim()) return user.email.trim().charAt(0).toUpperCase();
     return '?';
+  };
+
+  const getFirstName = (user: any) => {
+    if (user?.name && user.name.trim()) return user.name.trim().split(' ')[0];
+    if (user?.firstName && user.firstName.trim()) return user.firstName.trim();
+    if (user?.email && user.email.includes('@')) {
+      const p = user.email.split('@')[0];
+      return p.charAt(0).toUpperCase() + p.slice(1);
+    }
+    return 'Account';
   };
 
   return (
@@ -92,7 +104,7 @@ const Header = () => {
                   <span className="location-label">Delivery to</span>
                   <div className="address-wrapper">
                     <span className="address-text" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                      {formatAddress(user?.addresses?.find((a: any) => a.isSelected))}
+                      {formatAddress(user?.addresses?.find((a: any) => a.isSelected) || user?.addresses?.[0])}
                     </span>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -102,11 +114,20 @@ const Header = () => {
               </button>
             )}
             
-            <button onClick={() => navigate('PROFILE')} className="profile-button" aria-label="Profile">
+            <button 
+              onClick={() => navigate('PROFILE')} 
+              className="profile-button" 
+              aria-label="Profile"
+              title={user?.name ? `${user.name} (${user.email || ''})` : 'Profile'}
+            >
               <div className="profile-avatar-fallback">
                 <span className="profile-avatar-text">
                   {getInitial(user)}
                 </span>
+              </div>
+              <div className="header-user-info">
+                <span className="header-user-greeting">Hi, {getFirstName(user)}</span>
+                <span className="header-user-role">{user?.role?.replace(/_/g, ' ') || 'Customer'}</span>
               </div>
             </button>
 

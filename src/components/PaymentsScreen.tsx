@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { useAppNavigation, useCartCount } from '../context/AppContext';
+import { useAppNavigation, useCartCount, useUser } from '../context/AppContext';
 import { getUserData } from '../services/authentication.service';
 import { createOrder } from '../services/order.service';
 import { clearCart } from '../services/cart.service';
@@ -31,6 +31,7 @@ const OTHER_METHODS = [
 const PaymentsScreen = () => {
   const { navigate, categoryData, showToast } = useAppNavigation();
   const { refreshCartCount, resetCart } = useCartCount();
+  const { userData } = useUser();
   const [selectedMethod, setSelectedMethod] = useState('gpay');
   const [loading, setLoading] = useState(false);
 
@@ -108,6 +109,72 @@ const PaymentsScreen = () => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentWrapper}>
+          {/* Delivery & Customer Info Card */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 16,
+            padding: '16px 20px',
+            marginBottom: 20,
+            border: '1px solid #E8F5E9',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: '#E8F5E9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 20,
+                flexShrink: 0
+              }}>
+                📍
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>
+                    {userData?.name || 'Customer'}
+                  </span>
+                  {userData?.phone && (
+                    <span style={{ fontSize: 12, color: '#666', fontWeight: 500 }}>
+                      • {userData.phone}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 12, color: '#555', margin: '4px 0 0 0', lineHeight: '1.4' }}>
+                  {(() => {
+                    const selected = userData?.addresses?.find((a: any) => a.isSelected) || userData?.addresses?.[0];
+                    return selected 
+                      ? `${selected.type}: ${selected.streetAddress}, ${selected.city}, ${selected.state} ${selected.postalCode}` 
+                      : 'No delivery address selected';
+                  })()}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('SAVED_ADDRESSES', { from: 'PAYMENTS' })}
+              style={{
+                backgroundColor: '#F1F8E9',
+                color: '#2E7D32',
+                border: '1px solid #C8E6C9',
+                borderRadius: 8,
+                padding: '6px 14px',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Change
+            </button>
+          </div>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>UPI</Text>
             <View style={styles.cardContainer}>

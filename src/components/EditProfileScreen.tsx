@@ -13,14 +13,14 @@ import { getUserData, UserData, updateProfile, Address } from '../services/authe
 
 const EditProfileScreen = () => {
   const { navigate, showToast, categoryData } = useAppNavigation();
-  const { refreshUserData } = useUser();
-  const [loading, setLoading] = useState(true);
+  const { userData, refreshUserData } = useUser();
+  const [loading, setLoading] = useState(!userData);
   const [saving, setSaving] = useState(false);
   
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [name, setName] = useState(userData?.name || '');
+  const [email, setEmail] = useState(userData?.email || '');
+  const [phone, setPhone] = useState(userData?.phone || '');
+  const [addresses, setAddresses] = useState<Address[]>(userData?.addresses || []);
 
   useEffect(() => {
     const loadData = async () => {
