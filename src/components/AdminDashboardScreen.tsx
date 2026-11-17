@@ -39,7 +39,7 @@ const AdminDashboardScreen = () => {
     {
       title: 'Inventory & Growth',
       items: [
-        { id: 'add', title: 'Add Product', icon: '➕', color: '#FFF3E0', screen: 'ADD_PRODUCT' },
+        { id: 'inventory', title: 'Inventory', icon: '📦', color: '#E8F5E9', screen: 'INVENTORY_MANAGER' },
         { id: 'cat', title: 'Categories', icon: '📂', color: '#F3E5F5', screen: 'CATEGORY_MANAGER' },
         { id: 'off', title: 'Offers', icon: '🎟️', color: '#E0F2F1', screen: 'OFFER_MANAGER' },
         { id: 'low', title: 'Low Stock', icon: '📉', color: '#FFEBEE', screen: 'LOW_STOCK_DASHBOARD' },

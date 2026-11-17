@@ -20,7 +20,7 @@ const InventoryManagerScreen = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab ] = useState<'ORDERS' | 'INVENTORY'>('ORDERS');
+  const [activeTab, setActiveTab ] = useState<'ORDERS' | 'INVENTORY'>('INVENTORY');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
@@ -297,7 +297,18 @@ const InventoryManagerScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.dashboardHeader}>
-        <Text style={styles.headerTitle}>Inventory Manager</Text>
+        <TouchableOpacity onPress={() => navigate('ADMIN_DASHBOARD')} style={styles.backButton}>
+          <Text style={styles.backIcon}>←</Text>
+        </TouchableOpacity>
+        <View style={styles.headerTitleGroup}>
+          <Text style={styles.headerTitle}>Inventory Manager</Text>
+          <TouchableOpacity 
+            style={styles.addBtn}
+            onPress={() => navigate('ADD_PRODUCT')}
+          >
+            <Text style={styles.addBtnText}>+ Add Product</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity onPress={fetchData} style={styles.refreshBtn}>
           <Text style={styles.refreshIcon}>🔄</Text>
         </TouchableOpacity>
@@ -343,6 +354,23 @@ const InventoryManagerScreen = () => {
               </View>
           </View>
 
+          <View style={styles.tabWrapper}>
+              <View style={styles.tabBar}>
+                  <TouchableOpacity 
+                    style={[styles.tab, activeTab === 'INVENTORY' && styles.activeTab]}
+                    onPress={() => { setActiveTab('INVENTORY'); setSearchQuery(''); }}
+                  >
+                    <Text style={[styles.tabText, activeTab === 'INVENTORY' && styles.activeTabText]}>Stock Manager</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.tab, activeTab === 'ORDERS' && styles.activeTab]}
+                    onPress={() => { setActiveTab('ORDERS'); setSearchQuery(''); }}
+                  >
+                    <Text style={[styles.tabText, activeTab === 'ORDERS' && styles.activeTabText]}>Active Orders</Text>
+                  </TouchableOpacity>
+              </View>
+          </View>
+
           {activeTab === 'INVENTORY' && (
             <ScrollView 
                 horizontal 
@@ -367,23 +395,6 @@ const InventoryManagerScreen = () => {
                 })}
             </ScrollView>
           )}
-
-          <View style={styles.tabWrapper}>
-              <View style={styles.tabBar}>
-                  <TouchableOpacity 
-                    style={[styles.tab, activeTab === 'ORDERS' && styles.activeTab]}
-                    onPress={() => { setActiveTab('ORDERS'); setSearchQuery(''); }}
-                  >
-                    <Text style={[styles.tabText, activeTab === 'ORDERS' && styles.activeTabText]}>Active Orders</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[styles.tab, activeTab === 'INVENTORY' && styles.activeTab]}
-                    onPress={() => { setActiveTab('INVENTORY'); setSearchQuery(''); }}
-                  >
-                    <Text style={[styles.tabText, activeTab === 'INVENTORY' && styles.activeTabText]}>Stock Manager</Text>
-                  </TouchableOpacity>
-              </View>
-          </View>
 
           <View style={styles.listWrapper}>
             {loading ? (
@@ -441,7 +452,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
+  },
+  backButton: {
+    padding: 5,
+    marginRight: 10,
+  },
+  backIcon: {
+    fontSize: 24,
+    color: '#333',
+  },
+  headerTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
     flex: 1,
+  },
+  addBtn: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#C8E6C9',
+  },
+  addBtnText: {
+    color: '#2E7D32',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   refreshBtn: {
     padding: 5,
@@ -495,7 +532,12 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontSize: 14, color: '#333' },
   clearIcon: { fontSize: 16, color: '#999', padding: 4 },
 
-  categoryFilterContainer: { paddingHorizontal: 15, paddingBottom: 15, gap: 10 },
+  categoryFilterContainer: { 
+    paddingHorizontal: 15, 
+    paddingBottom: 15, 
+    gap: 10,
+    marginTop: 10 
+  },
   categoryChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd' },
   activeCategoryChip: { backgroundColor: '#2E7D32', borderColor: '#2E7D32' },
   categoryChipText: { fontSize: 13, color: '#666', fontWeight: '500' },

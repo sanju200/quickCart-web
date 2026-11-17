@@ -11,7 +11,6 @@ export interface Category {
     description?: string;
     image?: string;
     icon?: string;
-    bgColor?: string;
 }
 
 let categoriesPromise: Promise<Category[]> | null = null;

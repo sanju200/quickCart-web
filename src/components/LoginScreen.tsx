@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Storage } from '../services/storage.service';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppNavigation, useUser } from '../context/AppContext';
 import { loginUser } from '../services/authentication.service';
@@ -14,6 +15,18 @@ const LoginScreen = () => {
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' as 'success' | 'error' | 'info' });
   const passwordRef = useRef<any>(null);
+
+  useEffect(() => {
+    const clearStorage = async () => {
+      try {
+        await Storage.clear();
+        console.log('Local storage cleared on login screen');
+      } catch (error) {
+        console.error('Failed to clear local storage:', error);
+      }
+    };
+    clearStorage();
+  }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     setToast({ visible: true, message, type });

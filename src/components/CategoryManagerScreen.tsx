@@ -20,9 +20,10 @@ const CategoryManagerScreen = () => {
   
   // New Category Form
   const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState('');
+  const [newType, setNewType] = useState('');
   const [newIcon, setNewIcon] = useState('📦');
-  const [newBgColor, setNewBgColor] = useState('#F0F0F0');
+
+  const lightColors = ['#E8F5E9', '#FFF3E0', '#E3F2FD', '#F3E5F5', '#FFFDE7', '#FBE9E7', '#E0F2F1', '#F1F8E9', '#E8EAF6', '#FCE4EC'];
 
   useEffect(() => {
     fetchCategories();
@@ -41,8 +42,8 @@ const CategoryManagerScreen = () => {
   };
 
   const handleAddCategory = async () => {
-    if (!newTitle || !newCategory) {
-      showToast('Title and Category identifier are required', 'error');
+    if (!newTitle || !newType) {
+      showToast('Title and Type are required', 'error');
       return;
     }
 
@@ -50,15 +51,13 @@ const CategoryManagerScreen = () => {
       setLoading(true);
       await createCategory({
         title: newTitle,
-        category: newCategory,
+        category: newType.trim().toLowerCase().replace(/\s+/g, '-'),
         icon: newIcon,
-        bgColor: newBgColor,
       });
       showToast('Category added successfully', 'success');
       setNewTitle('');
-      setNewCategory('');
+      setNewType('');
       setNewIcon('📦');
-      setNewBgColor('#F0F0F0');
       setIsAdding(false);
       fetchCategories();
     } catch (error: any) {
@@ -85,14 +84,14 @@ const CategoryManagerScreen = () => {
     }
   };
 
-  const renderCategoryItem = ({ item }: { item: Category }) => (
+  const renderCategoryItem = ({ item, index }: { item: Category, index: number }) => (
     <View style={styles.categoryCard}>
-      <View style={[styles.categoryIconBox, { backgroundColor: item.bgColor || '#F0F0F0' }]}>
+      <View style={[styles.categoryIconBox, { backgroundColor: lightColors[index % lightColors.length] }]}>
         <Text style={styles.categoryIconMain}>{item.icon || '📂'}</Text>
       </View>
       <View style={styles.categoryInfo}>
         <Text style={styles.categoryName}>{item.title}</Text>
-        <Text style={styles.categoryTag}>Identifier: {item.category}</Text>
+        <Text style={styles.categoryTag}>Type: {item.category}</Text>
       </View>
       <TouchableOpacity 
         style={styles.deleteBtn} 
@@ -120,32 +119,40 @@ const CategoryManagerScreen = () => {
           <View style={styles.content}>
             {isAdding ? (
               <View style={styles.addForm}>
-                <Text style={styles.formTitle}>Add New Category</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Display Title (e.g. Organic Grains)"
-                  value={newTitle}
-                  onChangeText={setNewTitle}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Category ID (e.g. grains)"
-                  value={newCategory}
-                  onChangeText={setNewCategory}
-                  autoCapitalize="none"
-                />
-                <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={styles.formHeader}>
+                  <Text style={styles.formTitle}>Create New Category</Text>
+                  <TouchableOpacity onPress={() => setIsAdding(false)}>
+                    <Text style={styles.closeIcon}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Category Title</Text>
                   <TextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="Emoji Icon (e.g. 🌾)"
+                    style={styles.input}
+                    placeholder="e.g. Organic Grains"
+                    value={newTitle}
+                    onChangeText={setNewTitle}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Category Type</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. grains, dairy"
+                    value={newType}
+                    onChangeText={setNewType}
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Category Icon (Emoji)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. 🌾"
                     value={newIcon}
                     onChangeText={setNewIcon}
-                  />
-                  <TextInput
-                    style={[styles.input, { flex: 1 }]}
-                    placeholder="Hex Color (e.g. #E8F5E9)"
-                    value={newBgColor}
-                    onChangeText={setNewBgColor}
                   />
                 </View>
                 <View style={styles.formActions}>
@@ -179,7 +186,7 @@ const CategoryManagerScreen = () => {
                 scrollEnabled={false}
                 data={categories}
                 keyExtractor={(item) => item.id}
-                renderItem={renderCategoryItem}
+                renderItem={({ item, index }) => renderCategoryItem({ item, index })}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
                     <Text style={styles.emptyIcon}>📂</Text>
@@ -198,7 +205,7 @@ const CategoryManagerScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FBF9',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
@@ -269,14 +276,23 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   input: {
-    backgroundColor: '#F7F9F7',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E0EAE0',
-    borderRadius: 10,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
     fontSize: 14,
     color: '#333',
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#444',
+    marginBottom: 6,
+    marginLeft: 1,
   },
   formActions: {
     flexDirection: 'row',
@@ -338,10 +354,16 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   categoryTag: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#2E7D32',
-    marginTop: 2,
-    fontWeight: '600',
+    marginTop: 4,
+    fontWeight: '700',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    textTransform: 'uppercase',
   },
   deleteBtn: {
     padding: 10,
@@ -360,6 +382,20 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#999',
     marginTop: 10,
+  },
+  formHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+    paddingBottom: 12,
+  },
+  closeIcon: {
+    fontSize: 18,
+    color: '#999',
+    padding: 5,
   },
 });
 

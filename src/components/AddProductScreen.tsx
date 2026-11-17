@@ -164,9 +164,14 @@ const AddProductScreen = () => {
                 style={styles.dropdownTrigger}
                 onPress={() => setShowCategoryModal(true)}
               >
-                <Text style={styles.dropdownTriggerText}>
-                  {categories.find(c => c.id === selectedCategoryId)?.title || 'Select Category'}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 20, marginRight: 10 }}>
+                    {categories.find(c => c.id === selectedCategoryId)?.icon || '📦'}
+                  </Text>
+                  <Text style={styles.dropdownTriggerText}>
+                    {categories.find(c => c.id === selectedCategoryId)?.title || 'Select Category'}
+                  </Text>
+                </View>
                 <Text style={styles.dropdownArrow}>▼</Text>
               </TouchableOpacity>
             </View>
