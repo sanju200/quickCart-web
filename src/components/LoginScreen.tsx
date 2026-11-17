@@ -8,8 +8,8 @@ import ToastNotification from './ToastNotification';
 const LoginScreen = () => {
   const { navigate } = useAppNavigation();
   const { refreshUserData } = useUser();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('test.user@gmail.com');
+  const [password, setPassword] = useState('Test@123');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -64,6 +64,24 @@ const LoginScreen = () => {
       <View style={styles.card}>
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Log in to QuickCart to continue</Text>
+
+        <TouchableOpacity 
+          style={styles.demoBadge}
+          onPress={() => {
+            setEmail('test.user@gmail.com');
+            setPassword('Test@123');
+            showToast('Test credentials loaded', 'info');
+          }}
+          activeOpacity={0.7}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.demoBadgeTitle}>TEST CREDENTIALS</Text>
+            <Text style={styles.demoBadgeText}>test.user@gmail.com • Test@123</Text>
+          </View>
+          <View style={styles.demoFillBtn}>
+            <Text style={styles.demoFillBtnText}>Auto-fill</Text>
+          </View>
+        </TouchableOpacity>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email Address</Text>
@@ -138,7 +156,43 @@ const styles = StyleSheet.create({
     boxShadow: '0px 2px 10px rgba(0,0,0,0.1)',
   },
   title: { fontSize: 28, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 10, textAlign: 'center' },
-  subtitle: { fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' },
+  subtitle: { fontSize: 16, color: '#666', marginBottom: 20, textAlign: 'center' },
+  demoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F1F8E9',
+    borderColor: '#C8E6C9',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 20,
+  },
+  demoBadgeTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#2E7D32',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  demoBadgeText: {
+    fontSize: 11,
+    color: '#555',
+  },
+  demoFillBtn: {
+    backgroundColor: '#2E7D32',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  demoFillBtnText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
   inputContainer: { marginBottom: 20 },
   label: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 },
   input: {
